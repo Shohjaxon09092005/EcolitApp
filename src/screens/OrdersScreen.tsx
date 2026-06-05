@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Search, ChevronRight, Car, Camera, CheckCircle2, FileText, Package, Clock, TrendingUp } from "lucide-react"
+import { Search, Car, Camera, CheckCircle2, FileText, Package, Clock, TrendingUp } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"

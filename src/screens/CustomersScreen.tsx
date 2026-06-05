@@ -12,14 +12,12 @@ import {
   TrendingUp,
   ChevronRight,
   X,
-  CheckCircle,
   UserPlus,
   DollarSign,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +30,6 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useStore, formatCurrency, type Partner } from "@/lib/store";
@@ -72,7 +69,6 @@ export function CustomersScreen() {
   const totalCustomers = partners.length;
   const debtors = partners.filter((p) => p.debtAmount > 0);
   const totalDebt = debtors.reduce((sum, p) => sum + p.debtAmount, 0);
-  const avgDebt = totalCustomers ? totalDebt / totalCustomers : 0;
 
   // Filter customers
   const filtered = partners.filter((p) => {
@@ -161,7 +157,7 @@ export function CustomersScreen() {
             bg: "bg-red-100/70",
             delay: 200,
           },
-        ].map((stat, idx) => (
+        ].map((stat) => (
           <Card
             key={stat.label}
             className={`${glassCardClass} p-4 transition-all hover:scale-105 hover:shadow-xl ${scaleInClass}`}

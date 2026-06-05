@@ -1,4 +1,4 @@
-import { LayoutDashboard, PlusCircle, ShoppingBag, Tag, Users, Settings2 } from "lucide-react"
+import { LayoutDashboard, PlusCircle, ShoppingBag, Tag, Users } from "lucide-react"
 import { useStore } from "@/lib/store"
 import { DashboardScreen } from "@/screens/DashboardScreen"
 import { NewOrderScreen } from "@/screens/NewOrderScreen"
