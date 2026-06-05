@@ -8,16 +8,11 @@ import {
   AlertTriangle,
   ChevronRight,
   Award,
-  ShieldX,
   DollarSign,
   Users,
   PackageX,
   BarChart3,
-  Home,
-  LayoutGrid,
-  Plus,
-  PieChart,
-  Settings,
+  
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
@@ -39,7 +34,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts"
-import { useStore, formatCurrency, type SalaryInfo, type Fine } from "@/lib/store"
+import { useStore, formatCurrency, type SalaryInfo } from "@/lib/store"
 
 const MONTHS = ["Yan", "Fev", "Mar", "Apr", "May", "Iyn"]
 
@@ -58,7 +53,7 @@ export function DashboardScreen() {
   const [salaryOpen, setSalaryOpen] = useState(false)
 
   const progressPct = Math.min(100, Math.round((monthlyAchieved / monthlyTarget) * 100))
-  const daysLeft = 26
+  // const daysLeft = 26
   const totalDebt = orders
     .filter((o) => o.status !== "yetkazildi" && o.status !== "rad_etildi")
     .reduce((s, o) => s + o.debtAmount, 0)
