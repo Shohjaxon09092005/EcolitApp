@@ -1,3 +1,4 @@
+// src/screens/NewOrderScreen.tsx
 import { useState } from "react";
 import {
   Search,
@@ -16,9 +17,7 @@ import {
   CalendarDays,
   Upload,
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
+// import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -33,7 +32,6 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -44,10 +42,64 @@ import {
 } from "@/lib/store";
 import { InvoiceSheet } from "./InvoiceSheet";
 
-// Glassmorphism base class (same as Dashboard/OrdersScreen)
-const glassCardClass =
-  "bg-white/60 backdrop-blur-2xl border-white/50 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.05)] rounded-[28px] overflow-hidden border";
+// --------------------------------------------------------------
+// Dizayn tokenlari (dashboard bilan bir xil)
+// --------------------------------------------------------------
+const CARD = {
+  background: "rgba(9, 25, 13, 0.7)",
+  backdropFilter: "blur(12px)",
+  WebkitBackdropFilter: "blur(12px)",
+  border: "1px solid rgba(34, 197, 94, 0.25)",
+  borderRadius: 24,
+  boxShadow:
+    "0 4px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.03)",
+} as const;
 
+const INPUT_STYLE = {
+  width: "100%",
+  padding: "10px 30px",
+  background: "rgba(255, 255, 255, 0.05)",
+  border: "1px solid rgba(34, 197, 94, 0.4)",
+  borderRadius: 28,
+  fontSize: 14,
+  color: "#ffffff",
+  outline: "none",
+  transition: "all 0.2s",
+
+};
+
+const BUTTON_PRIMARY = {
+  background: "#22c55e",
+  border: "none",
+  borderRadius: 40,
+  padding: "12px 20px",
+  fontWeight: 700,
+  color: "#000000",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 8,
+  cursor: "pointer",
+  transition: "all 0.2s",
+};
+
+const BUTTON_SECONDARY = {
+  background: "rgba(255, 255, 255, 0.05)",
+  border: "1px solid rgba(34, 197, 94, 0.4)",
+  borderRadius: 40,
+  padding: "12px 20px",
+  fontWeight: 600,
+  color: "#ffffff",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 8,
+  cursor: "pointer",
+};
+
+// --------------------------------------------------------------
+// Asosiy komponent
+// --------------------------------------------------------------
 export function NewOrderScreen() {
   const {
     partners,
@@ -128,374 +180,645 @@ export function NewOrderScreen() {
   }
 
   return (
-    <div className="flex flex-col h-full pb-28 px-1 pt-4 max-w-md mx-auto">
+    <div
+      style={{
+        padding: "16px 12px 112px",
+        maxWidth: 480,
+        margin: "0 auto",
+      }}
+    >
       {/* Header */}
-      <div className="mb-4 px-2">
-        <p className="text-xs font-semibold uppercase tracking-widest mb-0.5 text-slate-500">
+      <div style={{ marginBottom: 24, padding: "0 8px" }}>
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 600,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            color: "#86efac",
+            marginBottom: 6,
+          }}
+        >
           Yangi buyurtma
-        </p>
-        <h1 className="text-2xl font-bold text-slate-900">Buyurtma yaratish</h1>
+        </div>
+        <h1
+          style={{
+            fontSize: 28,
+            fontWeight: 800,
+            color: "#ffffff",
+            letterSpacing: "-0.5px",
+          }}
+        >
+          Buyurtma yaratish
+        </h1>
       </div>
 
-      {/* Partner Selection */}
-      <Card className={`${glassCardClass} mb-5`}>
-        <CardContent className="p-5">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3">
-            Mijoz
-          </p>
-          {selectedPartner ? (
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-bold text-slate-900">
-                  {selectedPartner.name}
-                </p>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  {selectedPartner.phone}
-                </p>
+      {/* Partner Selection Card */}
+      <div style={{ ...CARD, padding: "20px", marginBottom: 24 }}>
+        <div
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            color: "#86efac",
+            marginBottom: 12,
+          }}
+        >
+          Mijoz
+        </div>
+        {selectedPartner ? (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <div>
+              <div style={{ fontWeight: 700, color: "#ffffff", fontSize: 16 }}>
+                {selectedPartner.name}
               </div>
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <p className="text-[10px] font-semibold text-slate-400 uppercase">
-                    Qarz
-                  </p>
-                  <p
-                    className={`text-sm font-bold ${
-                      debtRatio > 0.8 ? "text-amber-600" : "text-slate-700"
-                    }`}
-                  >
-                    {formatCurrency(selectedPartner.debtAmount)}
-                  </p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 rounded-full bg-white/40 hover:bg-white/80"
-                  onClick={() => {
-                    setSelectedPartner(null);
-                    setPartnerSearch("");
+              <div style={{ fontSize: 12, color: "#86efacb3", marginTop: 4 }}>
+                {selectedPartner.phone}
+              </div>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ textAlign: "right" }}>
+                <div
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 600,
+                    color: "#86efacb3",
+                    textTransform: "uppercase",
                   }}
                 >
-                  <X className="h-4 w-4 text-slate-500" />
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <Button
-              variant="outline"
-              className="w-full justify-between h-12 rounded-2xl bg-white/40 backdrop-blur-sm border-white/50 text-slate-500 hover:bg-white/60"
-              onClick={() => setPartnerModalOpen(true)}
-            >
-              Mijoz tanlash
-              <ChevronDown className="h-4 w-4" />
-            </Button>
-          )}
-          {selectedPartner && debtRatio > 0.7 && (
-            <div
-              className={`mt-4 rounded-2xl p-3 flex items-start gap-2 ${
-                debtRatio >= 1 || isOverLimit
-                  ? "bg-red-50/80 border border-red-100/50"
-                  : "bg-amber-50/80 border border-amber-100/50"
-              }`}
-            >
-              <AlertTriangle
-                className={`h-4 w-4 mt-0.5 flex-shrink-0 ${
-                  debtRatio >= 1 || isOverLimit
-                    ? "text-red-500"
-                    : "text-amber-500"
-                }`}
-              />
-              <div>
-                <p
-                  className={`text-xs font-bold ${
-                    debtRatio >= 1 || isOverLimit
-                      ? "text-red-600"
-                      : "text-amber-700"
-                  }`}
+                  Qarz
+                </div>
+                <div
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: debtRatio > 0.8 ? "#fb923c" : "#ffffff",
+                  }}
                 >
-                  {isOverLimit
-                    ? "Qarz limiti oshib ketdi!"
-                    : "Qarz limiti yaqinlashmoqda"}
-                </p>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Limit: {formatCurrency(selectedPartner.debtLimit)} | Joriy
-                  qarz: {formatCurrency(selectedPartner.debtAmount)}
-                </p>
+                  {formatCurrency(selectedPartner.debtAmount)}
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setSelectedPartner(null);
+                  setPartnerSearch("");
+                }}
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(34,197,94,0.3)",
+                  borderRadius: "50%",
+                  width: 32,
+                  height: 32,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                }}
+              >
+                <X size={16} color="#86efac" />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setPartnerModalOpen(true)}
+            style={{
+              ...BUTTON_SECONDARY,
+              width: "100%",
+              justifyContent: "space-between",
+              padding: "12px 16px",
+            }}
+          >
+            Mijoz tanlash
+            <ChevronDown size={16} />
+          </button>
+        )}
+        {selectedPartner && debtRatio > 0.7 && (
+          <div
+            style={{
+              marginTop: 16,
+              borderRadius: 20,
+              padding: "12px",
+              display: "flex",
+              gap: 10,
+              background: isOverLimit
+                ? "rgba(239,68,68,0.1)"
+                : "rgba(251,146,60,0.1)",
+              border: `1px solid ${isOverLimit ? "rgba(239,68,68,0.3)" : "rgba(251,146,60,0.3)"}`,
+            }}
+          >
+            <AlertTriangle
+              size={16}
+              color={isOverLimit ? "#f87171" : "#fb923c"}
+              style={{ marginTop: 2 }}
+            />
+            <div>
+              <div
+                style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: isOverLimit ? "#f87171" : "#fb923c",
+                }}
+              >
+                {isOverLimit
+                  ? "Qarz limiti oshib ketdi!"
+                  : "Qarz limiti yaqinlashmoqda"}
+              </div>
+              <div style={{ fontSize: 11, color: "#86efacb3", marginTop: 4 }}>
+                Limit: {formatCurrency(selectedPartner.debtLimit)} | Joriy qarz:{" "}
+                {formatCurrency(selectedPartner.debtAmount)}
               </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        )}
+      </div>
 
-      {/* Product Search */}
+      {/* Product Search Card */}
       {selectedPartner && (
-        <Card className={`${glassCardClass} mb-5`}>
-          <CardContent className="p-5">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3">
-              Mahsulot qo'shish
-            </p>
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <input
-                placeholder="Mahsulot qidirish..."
-                className="w-full h-12 pl-10 pr-4 text-sm rounded-2xl outline-none bg-white/60 backdrop-blur-2xl border-white/50 shadow-[0_8px_20px_-10px_rgba(0,0,0,0.05)] text-slate-800 placeholder:text-slate-400"
-                value={productSearch}
-                onChange={(e) => setProductSearch(e.target.value)}
-              />
-            </div>
-            {productSearch && (
-              <div className="mt-3 space-y-1 max-h-52 overflow-y-auto">
-                {filteredProducts.length === 0 ? (
-                  <p className="text-sm text-slate-500 text-center py-4">
-                    Mahsulot topilmadi
-                  </p>
-                ) : (
-                  filteredProducts.map((product) => {
-                    const inCart = cart.find(
-                      (i) => i.product.id === product.id,
-                    );
-                    return (
-                      <button
-                        key={product.id}
-                        className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/40 transition-colors text-left"
-                        onClick={() => {
-                          addToCart(product);
-                          setProductSearch("");
+        <div style={{ ...CARD, padding: "20px", marginBottom: 24 }}>
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              color: "#86efac",
+              marginBottom: 12,
+            }}
+          >
+            Mahsulot qo'shish
+          </div>
+          <div style={{ position: "relative" }}>
+            <Search
+              size={16}
+              style={{
+                position: "absolute",
+                left: 8,
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "#86efacb3",
+              }}
+            />
+            <input
+              placeholder="Mahsulot qidirish..."
+              value={productSearch}
+              onChange={(e) => setProductSearch(e.target.value)}
+              style={INPUT_STYLE}
+            />
+          </div>
+          {productSearch && (
+            <div
+              style={{
+                marginTop: 12,
+                maxHeight: 200,
+                overflowY: "auto",
+                display: "flex",
+                flexDirection: "column",
+                gap: 6,
+              }}
+            >
+              {filteredProducts.length === 0 ? (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: 12,
+                    color: "#86efac80",
+                  }}
+                >
+                  Mahsulot topilmadi
+                </div>
+              ) : (
+                filteredProducts.map((product) => {
+                  const inCart = cart.find((i) => i.product.id === product.id);
+                  return (
+                    <button
+                      key={product.id}
+                      onClick={() => {
+                        addToCart(product);
+                        setProductSearch("");
+                      }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "10px 12px",
+                        borderRadius: 20,
+                        background: "rgba(255,255,255,0.03)",
+                        border: "1px solid rgba(34,197,94,0.2)",
+                        textAlign: "left",
+                        width: "100%",
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontWeight: 600, color: "#ffffff" }}>
+                          {product.name}
+                        </div>
+                        <div style={{ fontSize: 11, color: "#86efacb3" }}>
+                          {product.stock} ta | {product.unit}
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
                         }}
                       >
-                        <div>
-                          <p className="text-sm font-bold text-slate-800">
-                            {product.name}
-                          </p>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            {product.stock} ta | {product.unit}
-                          </p>
+                        <div style={{ fontWeight: 700, color: "#4ade80" }}>
+                          {formatCurrency(product.price)}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <div className="text-right">
-                            <p className="text-sm font-bold text-slate-700">
-                              {formatCurrency(product.price)}
-                            </p>
+                        {inCart ? (
+                          <Badge
+                            style={{
+                              background: "#4ade8010",
+                              color: "#4ade80",
+                              border: "1px solid #4ade8030",
+                              borderRadius: 20,
+                            }}
+                          >
+                            Qo'shilgan
+                          </Badge>
+                        ) : (
+                          <div
+                            style={{
+                              background: "#22c55e",
+                              borderRadius: "50%",
+                              width: 28,
+                              height: 28,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <Plus size={14} color="#000" />
                           </div>
-                          {inCart ? (
-                            <Badge
-                              variant="secondary"
-                              className="text-xs bg-white/50 text-slate-600"
-                            >
-                              Qo'shilgan
-                            </Badge>
-                          ) : (
-                            <div className="h-7 w-7 rounded-full bg-indigo-500 flex items-center justify-center shadow-sm">
-                              <Plus className="h-3.5 w-3.5 text-white" />
-                            </div>
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          )}
+        </div>
       )}
 
       {/* Cart */}
       {cart.length > 0 && (
-        <Card className={`${glassCardClass} mb-5`}>
-          <CardContent className="p-5">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-4">
-              Savat ({cart.length} mahsulot)
-            </p>
-            <div className="space-y-3">
-              {cart.map((item) => {
-                const unitPrice = item.requestedPrice ?? item.product.price;
-                return (
+        <div style={{ ...CARD, padding: "20px", marginBottom: 24 }}>
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              color: "#86efac",
+              marginBottom: 16,
+            }}
+          >
+            Savat ({cart.length} mahsulot)
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {cart.map((item) => {
+              const unitPrice = item.requestedPrice ?? item.product.price;
+              return (
+                <div
+                  key={item.product.id}
+                  style={{
+                    background: "rgba(255,255,255,0.05)",
+                    borderRadius: 20,
+                    padding: "12px",
+                  }}
+                >
                   <div
-                    key={item.product.id}
-                    className="rounded-2xl bg-white/40 p-3"
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginBottom: 10,
+                    }}
                   >
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-slate-800 truncate">
-                          {item.product.name}
-                        </p>
-                        {item.requestedPrice && (
-                          <div className="flex items-center gap-1.5 mt-1">
-                            <span className="text-xs text-slate-400 line-through">
-                              {formatCurrency(item.product.price)}
-                            </span>
-                            <Badge
-                              variant="outline"
-                              className="text-[10px] py-0 h-4 text-indigo-600 border-indigo-200 bg-indigo-50/50"
-                            >
-                              So'ralgan narx
-                            </Badge>
-                          </div>
-                        )}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600, color: "#ffffff" }}>
+                        {item.product.name}
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 w-7 p-0 rounded-full bg-white/50 hover:bg-white/80 text-slate-500"
-                          onClick={() =>
-                            setPriceRequestModal({
-                              open: true,
-                              productId: item.product.id,
-                              productName: item.product.name,
-                              originalPrice: item.product.price,
-                              currentCartPrice:
-                                item.requestedPrice ?? item.product.price,
-                            })
-                          }
-                          title="Narxni pasaytirish so'rovi"
+                      {item.requestedPrice && (
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 6,
+                            marginTop: 4,
+                          }}
                         >
-                          <MessageSquare className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 w-7 p-0 rounded-full bg-white/50 hover:bg-red-50 text-red-500"
-                          onClick={() => removeFromCart(item.product.id)}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
+                          <span
+                            style={{
+                              fontSize: 11,
+                              color: "#86efac80",
+                              textDecoration: "line-through",
+                            }}
+                          >
+                            {formatCurrency(item.product.price)}
+                          </span>
+                          <Badge
+                            style={{
+                              background: "#4ade8010",
+                              color: "#4ade80",
+                              border: "1px solid #4ade8030",
+                              fontSize: 9,
+                              padding: "1px 8px",
+                            }}
+                          >
+                            So'ralgan narx
+                          </Badge>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 w-8 p-0 rounded-full border-white/50 bg-white/40 text-slate-700"
-                          onClick={() =>
-                            updateCartQuantity(
-                              item.product.id,
-                              item.quantity - 1,
-                            )
-                          }
-                        >
-                          <Minus className="h-3 w-3" />
-                        </Button>
-                        <span className="w-8 text-center text-sm font-bold text-slate-800">
-                          {item.quantity}
-                        </span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 w-8 p-0 rounded-full border-white/50 bg-white/40 text-slate-700"
-                          onClick={() =>
-                            updateCartQuantity(
-                              item.product.id,
-                              item.quantity + 1,
-                            )
-                          }
-                        >
-                          <Plus className="h-3 w-3" />
-                        </Button>
-                      </div>
-                      <p className="text-sm font-bold text-indigo-600">
-                        {formatCurrency(unitPrice * item.quantity)}
-                      </p>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button
+                        onClick={() =>
+                          setPriceRequestModal({
+                            open: true,
+                            productId: item.product.id,
+                            productName: item.product.name,
+                            originalPrice: item.product.price,
+                            currentCartPrice:
+                              item.requestedPrice ?? item.product.price,
+                          })
+                        }
+                        style={{
+                          background: "rgba(255,255,255,0.05)",
+                          border: "1px solid rgba(34,197,94,0.3)",
+                          borderRadius: "50%",
+                          width: 28,
+                          height: 28,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <MessageSquare size={14} color="#86efac" />
+                      </button>
+                      <button
+                        onClick={() => removeFromCart(item.product.id)}
+                        style={{
+                          background: "rgba(239,68,68,0.1)",
+                          border: "1px solid rgba(239,68,68,0.3)",
+                          borderRadius: "50%",
+                          width: 28,
+                          height: 28,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Trash2 size={14} color="#f87171" />
+                      </button>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {!selectedPartner && (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-20 h-20 rounded-3xl bg-white/60 backdrop-blur-2xl border-white/50 flex items-center justify-center mb-5 shadow-sm">
-            <ShoppingBag className="h-10 w-10 text-slate-400" />
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 8 }}
+                    >
+                      <button
+                        onClick={() =>
+                          updateCartQuantity(item.product.id, item.quantity - 1)
+                        }
+                        style={{
+                          background: "rgba(255,255,255,0.05)",
+                          border: "1px solid rgba(34,197,94,0.3)",
+                          borderRadius: "50%",
+                          width: 32,
+                          height: 32,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Minus size={12} color="#ffffff" />
+                      </button>
+                      <span
+                        style={{
+                          width: 32,
+                          textAlign: "center",
+                          fontWeight: 700,
+                          color: "#ffffff",
+                        }}
+                      >
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() =>
+                          updateCartQuantity(item.product.id, item.quantity + 1)
+                        }
+                        style={{
+                          background: "rgba(255,255,255,0.05)",
+                          border: "1px solid rgba(34,197,94,0.3)",
+                          borderRadius: "50%",
+                          width: 32,
+                          height: 32,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Plus size={12} color="#ffffff" />
+                      </button>
+                    </div>
+                    <div
+                      style={{
+                        fontWeight: 800,
+                        color: "#4ade80",
+                        fontSize: 16,
+                      }}
+                    >
+                      {formatCurrency(unitPrice * item.quantity)}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <p className="font-bold text-slate-700 mb-1">Buyurtma yaratish</p>
-          <p className="text-sm text-slate-500">Boshlash uchun mijoz tanlang</p>
         </div>
       )}
 
-      {/* Sticky Bottom Bar with Glass Effect */}
+      {!selectedPartner && (
+        <div style={{ textAlign: "center", padding: "48px 16px" }}>
+          <ShoppingBag
+            size={48}
+            style={{
+              marginBottom: 12,
+              opacity: 0.5,
+              color: "#86efac",
+              margin: "0 auto",
+            }}
+          />
+          <div style={{ fontWeight: 600, fontSize: 16, color: "#ffffff" }}>
+            Buyurtma yaratish
+          </div>
+          <div style={{ fontSize: 13, color: "#86efacb3", marginTop: 6 }}>
+            Boshlash uchun mijoz tanlang
+          </div>
+        </div>
+      )}
+
+      {/* Sticky Bottom Bar */}
       {cart.length > 0 && selectedPartner && (
-        <div className="fixed bottom-16 left-0 right-0 z-20 max-w-md mx-auto px-4">
-          <div className="bg-white/80 backdrop-blur-2xl border-white/70 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.2)] rounded-3xl p-4">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-semibold text-slate-500">
+        <div
+          style={{
+            position: "fixed",
+            bottom: 80,
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "calc(100% - 32px)",
+            maxWidth: 440,
+            zIndex: 20,
+          }}
+        >
+          <div
+            style={{
+              background: "rgba(9, 25, 13, 0.9)",
+              backdropFilter: "blur(20px)",
+              border: "1px solid rgba(34,197,94,0.3)",
+              borderRadius: 32,
+              padding: "16px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: 12,
+              }}
+            >
+              <span style={{ color: "#86efacb3", fontWeight: 600 }}>
                 Jami summa:
               </span>
-              <span className="text-xl font-black text-indigo-600">
+              <span style={{ fontSize: 20, fontWeight: 800, color: "#4ade80" }}>
                 {formatCurrency(cartTotal)}
               </span>
             </div>
-            <Button
-              className="w-full h-12 rounded-2xl font-bold text-base shadow-md"
-              variant={isOverLimit ? "outline" : "default"}
-              style={
-                !isOverLimit ? { background: "#6366f1", color: "white" } : {}
-              }
+            <button
               onClick={() => setPaymentSheet(true)}
+              style={{
+                ...BUTTON_PRIMARY,
+                width: "100%",
+                padding: "14px",
+                fontSize: 16,
+                background: isOverLimit ? "rgba(239,68,68,0.8)" : "#22c55e",
+              }}
             >
               {isOverLimit
                 ? "⚠️ Qarz uchun ruxsat so'rash"
                 : "Buyurtmani rasmiylashtirish"}
-            </Button>
+            </button>
           </div>
         </div>
       )}
 
-      {/* Partner Select Modal (Glass) */}
+      {/* Partner Modal */}
       <Dialog open={partnerModalOpen} onOpenChange={setPartnerModalOpen}>
-        <DialogContent className="max-w-sm mx-auto rounded-3xl bg-white/80 backdrop-blur-3xl border-white/60 shadow-2xl p-0 gap-0 overflow-hidden">
-          <DialogHeader className="p-5 pb-2 bg-white/40">
-            <DialogTitle className="text-lg font-bold text-slate-900">
+        <DialogContent
+          style={{
+            background: "rgba(3,14,7,0.98)",
+            backdropFilter: "blur(32px)",
+            border: "1px solid rgba(34,197,94,0.3)",
+            borderRadius: 32,
+            maxWidth: 400,
+          }}
+          className="[&>button]:hidden"
+        >
+          <DialogHeader>
+            <DialogTitle style={{ color: "#ffffff", fontWeight: 700 }}>
               Mijoz tanlash
             </DialogTitle>
           </DialogHeader>
-          <div className="p-5 pt-2 space-y-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <div style={{ marginTop: 8 }}>
+            <div style={{ position: "relative", marginBottom: 16 }}>
+              <Search
+                size={14}
+                style={{
+                  position: "absolute",
+                  left: 8,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "#86efac",
+                }}
+              />
               <input
-                placeholder="Mijoz qidirish..."
-                className="w-full h-11 pl-9 pr-4 text-sm rounded-2xl outline-none bg-white/60 backdrop-blur border-white/50 text-slate-800"
+                placeholder="Ism yoki telefon..."
                 value={partnerSearch}
                 onChange={(e) => setPartnerSearch(e.target.value)}
+                style={INPUT_STYLE}
               />
             </div>
-            <div className="space-y-1 max-h-72 overflow-y-auto">
+
+            {/* 🛠️ QUYIDAGI DIVGA TAILWIND KLASSLARI QO'SHILDI */}
+            <div
+              className="[&::-webkit-scrollbar]:hidden [scrollbar-width:none] [-ms-overflow-style:none]"
+              style={{
+                maxHeight: 300,
+                overflowY: "auto",
+                display: "flex",
+                flexDirection: "column",
+                gap: 6,
+              }}
+            >
               {filteredPartners.map((p) => {
                 const ratio = p.debtAmount / p.debtLimit;
                 return (
                   <button
                     key={p.id}
-                    className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/40 transition-colors text-left"
                     onClick={() => {
                       setSelectedPartner(p);
                       setPartnerModalOpen(false);
                       setPartnerSearch("");
                     }}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "12px",
+                      background: "rgba(255,255,255,0.03)",
+                      border: "1px solid rgba(34,197,94,0.2)",
+                      borderRadius: 20,
+                      width: "100%",
+                    }}
                   >
                     <div>
-                      <p className="text-sm font-bold text-slate-800">
+                      <div style={{ fontWeight: 600, color: "#ffffff" }}>
                         {p.name}
-                      </p>
-                      <p className="text-xs text-slate-500 mt-0.5">{p.phone}</p>
+                      </div>
+                      <div style={{ fontSize: 11, color: "#86efacb3" }}>
+                        {p.phone}
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p
-                        className={`text-xs font-bold ${
-                          ratio >= 1
-                            ? "text-red-600"
-                            : ratio > 0.7
-                              ? "text-amber-600"
-                              : "text-slate-500"
-                        }`}
+                    <div style={{ textAlign: "right" }}>
+                      <div
+                        style={{
+                          fontWeight: 700,
+                          color:
+                            ratio >= 1
+                              ? "#f87171"
+                              : ratio > 0.7
+                                ? "#fb923c"
+                                : "#ffffff",
+                        }}
                       >
                         {formatCurrency(p.debtAmount)}
-                      </p>
-                      <p className="text-[10px] text-slate-400">
+                      </div>
+                      <div style={{ fontSize: 10, color: "#86efac80" }}>
                         limit: {formatCurrency(p.debtLimit)}
-                      </p>
+                      </div>
                     </div>
                   </button>
                 );
@@ -505,29 +828,54 @@ export function NewOrderScreen() {
         </DialogContent>
       </Dialog>
 
-      {/* Price Request Modal (Glass) */}
+      {/* Price Request Modal */}
       <Dialog
         open={priceRequestModal.open}
         onOpenChange={(v) => setPriceRequestModal((s) => ({ ...s, open: v }))}
       >
-        <DialogContent className="max-w-sm mx-auto rounded-3xl bg-white/80 backdrop-blur-3xl border-white/60 shadow-2xl p-0 gap-0 overflow-hidden">
-          <DialogHeader className="p-5 pb-2 bg-white/40">
-            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-slate-900">
-              <MessageSquare className="h-5 w-5 text-indigo-500" />
+        <DialogContent
+          style={{
+            background: "rgba(3,14,7,0.98)",
+            backdropFilter: "blur(32px)",
+            border: "1px solid rgba(34,197,94,0.3)",
+            borderRadius: 32,
+            maxWidth: 400,
+          }}
+          className="[&>button]:hidden"
+        >
+          <DialogHeader>
+            <DialogTitle
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                color: "#ffffff",
+              }}
+            >
+              <MessageSquare size={18} color="#4ade80" />
               Narxni pasaytirish so'rovi
             </DialogTitle>
           </DialogHeader>
-          <div className="p-5 pt-2 space-y-4">
-            <div className="rounded-2xl bg-white/40 p-3">
-              <p className="text-sm font-bold mb-1 text-slate-800">
+          <div style={{ marginTop: 16 }}>
+            <div
+              style={{
+                background: "rgba(255,255,255,0.05)",
+                borderRadius: 20,
+                padding: "12px",
+                marginBottom: 16,
+              }}
+            >
+              <div style={{ fontWeight: 600, color: "#ffffff" }}>
                 {priceRequestModal.productName}
-              </p>
-              <p className="text-xs text-slate-500">
+              </div>
+              <div style={{ fontSize: 12, color: "#86efacb3" }}>
                 Joriy narx: {formatCurrency(priceRequestModal.originalPrice)}
-              </p>
+              </div>
             </div>
-            <div>
-              <Label className="text-xs font-bold text-slate-600 mb-1.5 block">
+            <div style={{ marginBottom: 12 }}>
+              <Label
+                style={{ color: "#86efac", fontSize: 12, fontWeight: 600 }}
+              >
                 So'ralayotgan narx (so'm)
               </Label>
               <input
@@ -535,43 +883,48 @@ export function NewOrderScreen() {
                 placeholder={String(priceRequestModal.currentCartPrice)}
                 value={priceInput}
                 onChange={(e) => setPriceInput(e.target.value)}
-                className="w-full h-11 px-4 text-sm rounded-2xl outline-none bg-white/60 backdrop-blur border-white/50 text-slate-800"
+                style={{ ...INPUT_STYLE, marginTop: 4 }}
               />
             </div>
-            <div>
-              <Label className="text-xs font-bold text-slate-600 mb-1.5 block">
+            <div style={{ marginBottom: 20 }}>
+              <Label
+                style={{ color: "#86efac", fontSize: 12, fontWeight: 600 }}
+              >
                 Sabab / Izoh
               </Label>
               <Textarea
                 placeholder="Narxni pasaytirish sababini yozing..."
                 value={priceReason}
                 onChange={(e) => setPriceReason(e.target.value)}
-                className="resize-none rounded-2xl bg-white/60 backdrop-blur border-white/50"
-                rows={3}
+                style={{
+                  ...INPUT_STYLE,
+                  minHeight: 80,
+                  borderRadius: 20,
+                  marginTop: 4,
+                }}
               />
             </div>
-            <div className="flex gap-2 pt-2">
-              <Button
-                variant="outline"
-                className="flex-1 rounded-xl h-11 bg-white/40 border-white/50 text-slate-700"
+            <div style={{ display: "flex", gap: 12 }}>
+              <button
                 onClick={() =>
                   setPriceRequestModal((s) => ({ ...s, open: false }))
                 }
+                style={{ ...BUTTON_SECONDARY, flex: 1 }}
               >
                 Bekor qilish
-              </Button>
-              <Button
-                className="flex-1 rounded-xl h-11 font-bold bg-indigo-500 hover:bg-indigo-600"
+              </button>
+              <button
                 onClick={handlePriceRequestSubmit}
+                style={{ ...BUTTON_PRIMARY, flex: 1 }}
               >
                 So'rov yuborish
-              </Button>
+              </button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Payment Sheet (Glass) */}
+      {/* Payment Sheet */}
       <PaymentSheet
         open={paymentSheet}
         onClose={() => setPaymentSheet(false)}
@@ -580,7 +933,7 @@ export function NewOrderScreen() {
         onConfirm={handlePlaceOrder}
       />
 
-      {/* Invoice */}
+      {/* Invoice Sheet */}
       {invoiceOrder && (
         <InvoiceSheet
           order={invoiceOrder}
@@ -594,6 +947,9 @@ export function NewOrderScreen() {
   );
 }
 
+// --------------------------------------------------------------
+// PaymentSheet (to‘liq dark/neon uslubda)
+// --------------------------------------------------------------
 function PaymentSheet({
   open,
   onClose,
@@ -623,26 +979,10 @@ function PaymentSheet({
     label: string;
     icon: React.ReactNode;
   }[] = [
-    {
-      key: "naqd",
-      label: "Naqd pul",
-      icon: <DollarSign className="h-5 w-5" />,
-    },
-    {
-      key: "plastik",
-      label: "Plastik karta",
-      icon: <CreditCard className="h-5 w-5" />,
-    },
-    {
-      key: "bank",
-      label: "Bank hisobi",
-      icon: <Building2 className="h-5 w-5" />,
-    },
-    {
-      key: "qarz",
-      label: "Qarz (Nasiya)",
-      icon: <CalendarDays className="h-5 w-5" />,
-    },
+    { key: "naqd", label: "Naqd pul", icon: <DollarSign size={20} /> },
+    { key: "plastik", label: "Plastik karta", icon: <CreditCard size={20} /> },
+    { key: "bank", label: "Bank hisobi", icon: <Building2 size={20} /> },
+    { key: "qarz", label: "Qarz (Nasiya)", icon: <CalendarDays size={20} /> },
   ];
 
   function handleConfirm() {
@@ -658,50 +998,104 @@ function PaymentSheet({
 
   return (
     <Drawer open={open} onClose={onClose}>
-      <DrawerContent className="max-h-[90vh] bg-white/80 backdrop-blur-3xl border-t border-white/60 shadow-2xl rounded-t-[32px]">
-        <DrawerHeader className="pt-6 pb-2 px-5 relative">
-          <DrawerTitle className="flex items-center gap-2 text-xl font-bold text-slate-900">
-            <CheckCircle className="h-5 w-5 text-indigo-500" />
+      <DrawerContent
+        style={{
+          background: "rgba(3,14,7,0.98)",
+          backdropFilter: "blur(32px)",
+          borderTop: "1px solid rgba(34,197,94,0.3)",
+          borderRadius: "32px 32px 0 0",
+        }}
+        className="[&>div]:bg-transparent"
+      >
+        <DrawerHeader
+          style={{
+            padding: "20px 20px 12px",
+            borderBottom: "1px solid rgba(34,197,94,0.2)",
+            position: "relative",
+          }}
+        >
+          <DrawerTitle
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              fontSize: 20,
+              color: "#ffffff",
+            }}
+          >
+            <CheckCircle size={20} color="#4ade80" />
             To'lov usulini tanlang
           </DrawerTitle>
-          <p className="text-sm text-slate-500 mt-1">
+          <p style={{ color: "#86efacb3", marginTop: 6, fontSize: 13 }}>
             Mijoz: {partnerName} | Jami:{" "}
-            <span className="font-bold text-slate-800">
+            <strong style={{ color: "#4ade80" }}>
               {formatCurrency(total)}
-            </span>
+            </strong>
           </p>
           <button
             onClick={onClose}
-            className="absolute right-4 top-4 rounded-full p-1.5 bg-white/40 hover:bg-white/60 transition-colors"
+            style={{
+              position: "absolute",
+              top: 20,
+              right: 20,
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(34,197,94,0.3)",
+              borderRadius: "50%",
+              width: 32,
+              height: 32,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
-            <X className="h-4 w-4 text-slate-500" />
+            <X size={16} color="#86efac" />
           </button>
         </DrawerHeader>
 
-        <div className="px-5 pb-8 space-y-5 overflow-y-auto">
-          {/* Payment method selection */}
-          <div className="grid grid-cols-2 gap-3">
+        <div
+          style={{
+            padding: "20px",
+            overflowY: "auto",
+            display: "flex",
+            flexDirection: "column",
+            gap: 20,
+          }}
+        >
+          <div
+            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
+          >
             {methods.map((m) => (
               <button
                 key={m.key}
                 onClick={() => setMethod(m.key)}
-                className={`flex flex-col items-center gap-2 p-4 rounded-2xl transition-all duration-200 transform active:scale-95 ${
-                  method === m.key
-                    ? "bg-indigo-50/90 border-2 border-indigo-400 shadow-md scale-[1.02]"
-                    : "bg-white/40 border border-white/60 hover:bg-white/60"
-                }`}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "14px",
+                  borderRadius: 24,
+                  background:
+                    method === m.key
+                      ? "rgba(74,222,128,0.15)"
+                      : "rgba(255,255,255,0.03)",
+                  border:
+                    method === m.key
+                      ? "1px solid #4ade80"
+                      : "1px solid rgba(34,197,94,0.3)",
+                  transition: "all 0.2s",
+                }}
               >
                 <div
-                  className={`transition-colors ${
-                    method === m.key ? "text-indigo-600" : "text-slate-500"
-                  }`}
+                  style={{ color: method === m.key ? "#4ade80" : "#ffffff" }}
                 >
                   {m.icon}
                 </div>
                 <span
-                  className={`text-sm font-bold ${
-                    method === m.key ? "text-indigo-700" : "text-slate-600"
-                  }`}
+                  style={{
+                    fontWeight: 600,
+                    color: method === m.key ? "#4ade80" : "#ffffff",
+                  }}
                 >
                   {m.label}
                 </span>
@@ -709,104 +1103,110 @@ function PaymentSheet({
             ))}
           </div>
 
-          {/* Check upload for plastik */}
           {method === "plastik" && (
-            <div className="animate-in slide-in-from-top-2 fade-in duration-300">
-              <button
-                className={`w-full flex items-center gap-3 p-4 rounded-2xl transition-all ${
-                  checkUploaded
-                    ? "bg-green-50/80 border-2 border-green-400 shadow-md"
-                    : "bg-white/40 border border-white/60 hover:bg-white/60"
-                }`}
-                onClick={() => setCheckUploaded((v) => !v)}
+            <button
+              onClick={() => setCheckUploaded((v) => !v)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                padding: "14px",
+                borderRadius: 28,
+                background: checkUploaded
+                  ? "rgba(74,222,128,0.1)"
+                  : "rgba(255,255,255,0.03)",
+                border: checkUploaded
+                  ? "1px solid #4ade80"
+                  : "1px solid rgba(34,197,94,0.3)",
+              }}
+            >
+              <div
+                style={{
+                  width: 20,
+                  height: 20,
+                  borderRadius: 6,
+                  border: "2px solid #4ade80",
+                  background: checkUploaded ? "#4ade80" : "transparent",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
-                <div
-                  className={`h-5 w-5 rounded-md border-2 flex items-center justify-center transition-all ${
-                    checkUploaded
-                      ? "border-green-500 bg-green-500"
-                      : "border-slate-400"
-                  }`}
-                >
-                  {checkUploaded && (
-                    <CheckCircle className="h-3.5 w-3.5 text-white" />
-                  )}
-                </div>
-                <span className="text-sm font-medium text-slate-700">
-                  {checkUploaded ? "Chek yuklandi ✓" : "To'lov chekini yuklash"}
-                </span>
-                <Upload className="h-4 w-4 text-slate-500 ml-auto" />
-              </button>
-            </div>
+                {checkUploaded && <CheckCircle size={12} color="#000" />}
+              </div>
+              <span style={{ color: "#ffffff", fontWeight: 500 }}>
+                {checkUploaded ? "Chek yuklandi ✓" : "To'lov chekini yuklash"}
+              </span>
+              <Upload
+                size={16}
+                style={{ marginLeft: "auto", color: "#86efac" }}
+              />
+            </button>
           )}
 
-          {/* Qarz fields */}
           {method === "qarz" && (
-            <div className="space-y-4 animate-in slide-in-from-bottom-2 fade-in duration-300">
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <div>
-                <Label className="text-xs font-bold text-slate-600 mb-1.5 block">
+                <Label style={{ color: "#86efac", fontSize: 12 }}>
                   Avans to'lov (so'm)
                 </Label>
                 <input
                   type="number"
-                  placeholder="0"
                   value={paidAmount}
                   onChange={(e) => setPaidAmount(e.target.value)}
-                  className="w-full h-11 px-4 text-sm rounded-2xl outline-none bg-white/60 backdrop-blur border-white/50 text-slate-800 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 transition-all"
+                  style={INPUT_STYLE}
                 />
               </div>
               <div>
-                <Label className="text-xs font-bold text-slate-600 mb-1.5 block">
+                <Label style={{ color: "#86efac", fontSize: 12 }}>
                   To'lov muddati
                 </Label>
                 <input
                   type="date"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full h-11 px-4 text-sm rounded-2xl outline-none bg-white/60 backdrop-blur border-white/50 text-slate-800 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 transition-all"
+                  style={INPUT_STYLE}
                 />
               </div>
               <div>
-                <Label className="text-xs font-bold text-slate-600 mb-1.5 block">
+                <Label style={{ color: "#86efac", fontSize: 12 }}>
                   Izoh / Sabab
                 </Label>
                 <Textarea
                   placeholder="Qarz sababi..."
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  className="resize-none rounded-2xl bg-white/60 backdrop-blur border-white/50 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 transition-all"
-                  rows={3}
+                  style={{ ...INPUT_STYLE, minHeight: 80, borderRadius: 24 }}
                 />
               </div>
             </div>
           )}
 
-          <Separator className="bg-slate-200/50" />
-
-          {/* Total summary */}
-          <div className="rounded-2xl bg-indigo-50/50 p-4 flex items-center justify-between transition-all">
-            <span className="text-sm font-semibold text-slate-600">
-              Jami to'lov:
-            </span>
-            <span className="text-xl font-black text-indigo-600">
+          <Separator style={{ background: "rgba(34,197,94,0.2)" }} />
+          <div
+            style={{
+              background: "rgba(74,222,128,0.05)",
+              borderRadius: 28,
+              padding: "16px",
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <span style={{ color: "#86efacb3" }}>Jami to'lov:</span>
+            <span style={{ fontSize: 20, fontWeight: 800, color: "#4ade80" }}>
               {formatCurrency(total)}
             </span>
           </div>
-
-          {/* Action buttons */}
-          <div className="flex gap-3 pt-2">
-            <Button
-              variant="outline"
-              className="flex-1 h-12 rounded-xl bg-white/40 border-white/50 text-slate-700 hover:bg-white/60 active:scale-95 transition-all"
-              onClick={onClose}
-            >
+          <div style={{ display: "flex", gap: 12 }}>
+            <button onClick={onClose} style={{ ...BUTTON_SECONDARY, flex: 1 }}>
               Bekor qilish
-            </Button>
-            <Button
-              className="flex-1 h-12 rounded-xl font-bold bg-indigo-500 hover:bg-indigo-600 active:scale-95 transition-all shadow-md"
+            </button>
+            <button
               onClick={handleConfirm}
+              style={{ ...BUTTON_PRIMARY, flex: 1 }}
             >
               Tasdiqlash
-            </Button>
+            </button>
           </div>
         </div>
       </DrawerContent>

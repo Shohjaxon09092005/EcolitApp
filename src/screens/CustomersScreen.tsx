@@ -1,3 +1,4 @@
+// src/screens/CustomersScreen.tsx
 import { useState } from "react";
 import {
   Users,
@@ -10,13 +11,13 @@ import {
   FileText,
   AlertTriangle,
   TrendingUp,
-  ChevronRight,
+//   ChevronRight,
   X,
   UserPlus,
   DollarSign,
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+// import { Card, CardContent } from "@/components/ui/card";
+// import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -34,14 +35,62 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useStore, formatCurrency, type Partner } from "@/lib/store";
 
-// Glassmorphism base class
-const glassCardClass =
-  "bg-white/60 backdrop-blur-2xl border-white/50 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.05)] rounded-[28px] overflow-hidden border";
+// --------------------------------------------------------------
+// Dizayn tokenlari (dashboard bilan bir xil)
+// --------------------------------------------------------------
+const CARD = {
+  background: "rgba(9, 25, 13, 0.7)",
+  backdropFilter: "blur(12px)",
+  WebkitBackdropFilter: "blur(12px)",
+  border: "1px solid rgba(34, 197, 94, 0.25)",
+  borderRadius: 24,
+  boxShadow:
+    "0 4px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.03)",
+} as const;
 
-// Animation classes
-const fadeInClass = "animate-in fade-in duration-500";
-const scaleInClass = "animate-in zoom-in-95 duration-300";
+const INPUT_STYLE = {
+  width: "100%",
+  padding: "10px 26px",
+  background: "rgba(255, 255, 255, 0.05)",
+  border: "1px solid rgba(34, 197, 94, 0.4)",
+  borderRadius: 28,
+  fontSize: 14,
+  color: "#ffffff",
+  outline: "none",
+  transition: "all 0.2s",
+};
 
+const BUTTON_PRIMARY = {
+  background: "#22c55e",
+  border: "none",
+  borderRadius: 40,
+  padding: "10px 16px",
+  fontWeight: 700,
+  color: "#000000",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 8,
+  cursor: "pointer",
+};
+
+const BUTTON_SECONDARY = {
+  background: "rgba(255, 255, 255, 0.05)",
+  border: "1px solid rgba(34, 197, 94, 0.4)",
+  borderRadius: 40,
+  padding: "10px 16px",
+  fontWeight: 600,
+  color: "#ffffff",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 8,
+  cursor: "pointer",
+};
+
+// --------------------------------------------------------------
+// Asosiy komponent
+// --------------------------------------------------------------
 export function CustomersScreen() {
   const { partners, addPartner } = useStore();
   const [search, setSearch] = useState("");
@@ -51,7 +100,6 @@ export function CustomersScreen() {
   );
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
-  // New customer form state
   const [newCustomer, setNewCustomer] = useState({
     name: "",
     phone: "",
@@ -65,13 +113,10 @@ export function CustomersScreen() {
     phone?: string;
   }>({});
 
-  // Statistics
   const totalCustomers = partners.length;
   const debtors = partners.filter((p) => p.debtAmount > 0);
   const totalDebt = debtors.reduce((sum, p) => sum + p.debtAmount, 0);
-//   const avgDebt = totalCustomers ? totalDebt / totalCustomers : 0;
 
-  // Filter customers
   const filtered = partners.filter((p) => {
     const matchesSearch =
       search === "" ||
@@ -81,8 +126,15 @@ export function CustomersScreen() {
     return matchesSearch && matchesDebtor;
   });
 
+  function formatCompactCurrency(amount: number): string {
+    if (amount >= 1_000_000_000)
+      return (amount / 1_000_000_000).toFixed(1) + " mlrd so'm";
+    if (amount >= 1_000_000)
+      return (amount / 1_000_000).toFixed(1) + " mln so'm";
+    return formatCurrency(amount);
+  }
+
   function handleCreateCustomer() {
-    // Validation
     const errors: { name?: string; phone?: string } = {};
     if (!newCustomer.name.trim()) errors.name = "Ism majburiy";
     if (!newCustomer.phone.trim()) errors.phone = "Telefon majburiy";
@@ -90,7 +142,6 @@ export function CustomersScreen() {
       setFormErrors(errors);
       return;
     }
-    // Add partner (using existing store method)
     addPartner({
       name: newCustomer.name,
       phone: newCustomer.phone,
@@ -112,191 +163,347 @@ export function CustomersScreen() {
     });
     setFormErrors({});
   }
-  function formatCompactCurrency(amount: number): string {
-    if (amount >= 1_000_000_000) {
-      return (amount / 1_000_000_000).toFixed(1) + " mlrd so'm";
-    }
-    if (amount >= 1_000_000) {
-      return (amount / 1_000_000).toFixed(1) + " mln so'm";
-    }
-    return formatCurrency(amount);
-  }
+
   return (
-    <div className="flex flex-col h-full pb-28 px-1 pt-4 max-w-md mx-auto">
-      {/* Header with animation */}
-      <div className={`mb-4 px-2 ${fadeInClass}`}>
-        <p className="text-xs font-semibold uppercase tracking-widest mb-0.5 text-slate-500">
+    <div
+      style={{
+        padding: "16px 12px 112px",
+        maxWidth: 480,
+        margin: "0 auto",
+      }}
+    >
+      {/* Header */}
+      <div style={{ marginBottom: 24, padding: "0 8px" }}>
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 600,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            color: "#86efac",
+            marginBottom: 6,
+          }}
+        >
           Mijozlar bazasi
-        </p>
-        <h1 className="text-2xl font-bold text-slate-900">Mijozlar</h1>
+        </div>
+        <h1
+          style={{
+            fontSize: 28,
+            fontWeight: 800,
+            color: "#ffffff",
+            letterSpacing: "-0.5px",
+          }}
+        >
+          Mijozlar
+        </h1>
       </div>
 
-      {/* Statistics Cards with hover animation */}
-      <div className="grid grid-cols-3 gap-3 mb-5 px-2">
+      {/* Statistics Cards */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr 1fr",
+          gap: 12,
+          marginBottom: 24,
+          padding: "0 8px",
+        }}
+      >
         {[
           {
             label: "Jami mijozlar",
             value: totalCustomers,
             icon: Users,
-            color: "#6366f1",
-            bg: "bg-indigo-100/70",
-            delay: 0,
+            color: "#60a5fa",
+            bg: "rgba(96,165,250,0.1)",
           },
           {
             label: "Qarzdorlar",
             value: debtors.length,
             icon: AlertTriangle,
-            color: "#f59e0b",
-            bg: "bg-amber-100/70",
-            delay: 100,
+            color: "#fb923c",
+            bg: "rgba(251,146,60,0.1)",
           },
           {
             label: "Jami qarz",
             value: formatCompactCurrency(totalDebt),
             icon: DollarSign,
-            color: "#ef4444",
-            bg: "bg-red-100/70",
-            delay: 200,
+            color: "#f87171",
+            bg: "rgba(248,113,113,0.1)",
           },
         ].map((stat) => (
-          <Card
+          <div
             key={stat.label}
-            className={`${glassCardClass} p-4 transition-all hover:scale-105 hover:shadow-xl ${scaleInClass}`}
-            style={{ animationDelay: `${stat.delay}ms` }}
+            style={{ ...CARD, padding: "14px 10px", textAlign: "center" }}
           >
             <div
-              className={`w-10 h-10 rounded-[14px] ${stat.bg} flex items-center justify-center mb-3 shadow-sm`}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 12,
+                background: stat.bg,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 10px",
+              }}
             >
-              <stat.icon style={{ width: 18, height: 18, color: stat.color }} />
+              <stat.icon size={18} color={stat.color} />
             </div>
-            <p className="text-lg font-black text-slate-900 leading-tight break-words">
+            <div
+              style={{
+                fontSize: 20,
+                fontWeight: 800,
+                color: "#ffffff",
+                lineHeight: 1.1,
+              }}
+            >
               {stat.value}
-            </p>
-            <p className="text-[11px] font-semibold text-slate-500 mt-1.5">
+            </div>
+            <div style={{ fontSize: 11, color: "#86efacb3", marginTop: 6 }}>
               {stat.label}
-            </p>
-          </Card>
+            </div>
+          </div>
         ))}
       </div>
 
-      {/* Search + Filter + Add Button */}
-      <div className="flex gap-2 mb-4 px-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+      {/* Search + Filter + Add */}
+      <div
+        style={{ display: "flex", gap: 12, marginBottom: 24, padding: "0 8px" }}
+      >
+        <div style={{ position: "relative", flex: 1 }}>
+          <Search
+            size={16}
+            style={{
+              position: "absolute",
+              left: 8,
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "#86efac80",
+            }}
+          />
           <input
             placeholder="Ism yoki telefon bo‘yicha..."
-            className="w-full h-11 pl-9 pr-4 text-sm rounded-2xl outline-none transition-all bg-white/60 backdrop-blur-2xl border-white/50 shadow-[0_8px_20px_-10px_rgba(0,0,0,0.05)] text-slate-800 placeholder:text-slate-400"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            style={INPUT_STYLE}
           />
         </div>
-        <Button
-          variant={filterDebtors ? "default" : "outline"}
-          className={`h-11 px-4 rounded-2xl gap-2 transition-all ${
-            filterDebtors
-              ? "bg-indigo-500 text-white shadow-md"
-              : "bg-white/60 backdrop-blur-2xl border-white/50 text-slate-600"
-          }`}
+        <button
           onClick={() => setFilterDebtors(!filterDebtors)}
+          style={{
+            ...(filterDebtors ? BUTTON_PRIMARY : BUTTON_SECONDARY),
+            padding: "0 18px",
+            whiteSpace: "nowrap",
+          }}
         >
-          <AlertTriangle className="h-4 w-4" />
+          <AlertTriangle size={16} />
           Qarzdorlar
-        </Button>
-        <Button
-          className="h-11 w-11 rounded-2xl bg-indigo-500 text-white shadow-md hover:bg-indigo-600 transition-all active:scale-95"
+        </button>
+        <button
           onClick={() => setCreateModalOpen(true)}
+          style={{
+            ...BUTTON_PRIMARY,
+            width: 44,
+            height: 44,
+            padding: 0,
+            justifyContent: "center",
+          }}
         >
-          <Plus className="h-5 w-5" />
-        </Button>
+          <Plus size={20} />
+        </button>
       </div>
 
       {/* Customers List */}
-      <div className="space-y-3 px-2">
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 14,
+          padding: "0 8px",
+        }}
+      >
         {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-20 h-20 rounded-3xl bg-white/60 backdrop-blur-2xl border-white/50 flex items-center justify-center mb-5 shadow-sm">
-              <Users className="h-10 w-10 text-slate-400" />
+          <div style={{ textAlign: "center", padding: "48px 16px" }}>
+            <Users
+              size={48}
+              style={{ marginBottom: 12, opacity: 0.5, color: "#86efac" }}
+            />
+            <div style={{ fontWeight: 600, fontSize: 16, color: "#ffffff" }}>
+              Mijoz topilmadi
             </div>
-            <p className="font-bold text-slate-700">Mijoz topilmadi</p>
-            <p className="text-sm text-slate-500 mt-1">
-              Yangi mijoz qo'shish uchun + tugmasini bosing
-            </p>
+            <div style={{ fontSize: 13, color: "#86efacb3", marginTop: 6 }}>
+              Yangi mijoz qo‘shish uchun + tugmasini bosing
+            </div>
           </div>
         ) : (
           filtered.map((customer, idx) => (
             <button
               key={customer.id}
-              className="w-full text-left transition-all active:scale-[0.98] animate-in fade-in slide-in-from-bottom-2 duration-300"
-              style={{ animationDelay: `${idx * 50}ms` }}
               onClick={() => setSelectedCustomer(customer)}
+              style={{
+                ...CARD,
+                padding: "16px",
+                textAlign: "left",
+                width: "100%",
+                transition: "transform 0.1s",
+                animation: `fadeInUp 0.3s ease ${idx * 0.05}s both`,
+              }}
+              className="active:scale-[0.98]"
             >
-              <Card className={`${glassCardClass} relative overflow-hidden`}>
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
-                          <span className="text-indigo-600 font-bold text-sm">
-                            {customer.name.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <p className="text-base font-bold text-slate-900 truncate">
-                          {customer.name}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
-                        <Phone className="h-3 w-3" />
-                        <span>{customer.phone}</span>
-                      </div>
-                      {customer.email && (
-                        <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
-                          <Mail className="h-3 w-3" />
-                          <span className="truncate">{customer.email}</span>
-                        </div>
-                      )}
+              <style>
+                {`
+                  @keyframes fadeInUp {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                  }
+                `}
+              </style>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                }}
+              >
+                <div style={{ flex: 1 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 12,
+                      marginBottom: 10,
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: "50%",
+                        background: "rgba(74,222,128,0.15)",
+                        border: "1px solid rgba(74,222,128,0.3)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: 18,
+                          fontWeight: 700,
+                          color: "#4ade80",
+                        }}
+                      >
+                        {customer.name.charAt(0).toUpperCase()}
+                      </span>
                     </div>
-                    <div className="flex flex-col items-end gap-1">
-                      {customer.debtAmount > 0 ? (
-                        <Badge className="bg-red-100 text-red-700 border-red-200 rounded-full px-2.5 py-0.5 text-[10px] font-bold">
-                          Qarz: {formatCurrency(customer.debtAmount)}
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-green-100 text-green-700 border-green-200 rounded-full px-2.5 py-0.5 text-[10px] font-bold">
-                          To'lovchi
-                        </Badge>
-                      )}
-                      <ChevronRight className="h-4 w-4 text-slate-400 mt-2" />
+                    <div>
+                      <div
+                        style={{
+                          fontWeight: 700,
+                          fontSize: 16,
+                          color: "#ffffff",
+                        }}
+                      >
+                        {customer.name}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: "#86efacb3",
+                          marginTop: 2,
+                        }}
+                      >
+                        {customer.phone}
+                      </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                  {customer.email && (
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        fontSize: 12,
+                        color: "#86efacb3",
+                        marginBottom: 4,
+                      }}
+                    >
+                      <Mail size={12} />
+                      <span>{customer.email}</span>
+                    </div>
+                  )}
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  {customer.debtAmount > 0 ? (
+                    <Badge
+                      style={{
+                        background: "rgba(248,113,113,0.15)",
+                        color: "#f87171",
+                        border: "1px solid rgba(248,113,113,0.4)",
+                        borderRadius: 20,
+                        fontSize: 10,
+                        fontWeight: 700,
+                        padding: "2px 10px",
+                      }}
+                    >
+                      Qarz: {formatCurrency(customer.debtAmount)}
+                    </Badge>
+                  ) : (
+                    <Badge
+                      style={{
+                        background: "rgba(74,222,128,0.15)",
+                        color: "#4ade80",
+                        border: "1px solid rgba(74,222,128,0.4)",
+                        borderRadius: 20,
+                        fontSize: 10,
+                        fontWeight: 700,
+                        padding: "2px 10px",
+                      }}
+                    >
+                      To'lovchi
+                    </Badge>
+                  )}
+                  
+                </div>
+              </div>
             </button>
           ))
         )}
       </div>
 
-      {/* Customer Detail Drawer */}
-      {selectedCustomer && (
-        <CustomerDetailDrawer
-          customer={selectedCustomer}
-          onClose={() => setSelectedCustomer(null)}
-        />
-      )}
-
       {/* Create Customer Modal */}
       <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
-        <DialogContent className="max-w-sm mx-auto rounded-3xl bg-white/80 backdrop-blur-3xl border-white/60 shadow-2xl p-0 gap-0 overflow-hidden">
-          <DialogHeader className="p-5 pb-2 bg-white/40">
-            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-slate-900">
-              <UserPlus className="h-5 w-5 text-indigo-500" />
+        <DialogContent
+          style={{
+            background: "rgba(3,14,7,0.98)",
+            backdropFilter: "blur(32px)",
+            border: "1px solid rgba(34,197,94,0.3)",
+            borderRadius: 32,
+            maxWidth: 400,
+          }}
+          className="[&>button]:hidden"
+        >
+          <DialogHeader>
+            <DialogTitle
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                color: "#ffffff",
+                fontWeight: 700,
+              }}
+            >
+              <UserPlus size={20} color="#4ade80" />
               Yangi mijoz qo'shish
             </DialogTitle>
           </DialogHeader>
-          <div className="p-5 pt-3 space-y-4 max-h-[70vh] overflow-y-auto">
-            {/* Name */}
-            <div>
-              <Label className="text-xs font-bold text-slate-700">
-                Ism <span className="text-red-500">*</span>
+          <div className="[&::-webkit-scrollbar]:hidden [scrollbar-width:none] [-ms-overflow-style:none]"
+          style={{ marginTop: 16, maxHeight: "70vh", overflowY: "auto", }}>
+            <div style={{ marginBottom: 16 }}>
+              <Label
+                style={{ color: "#86efac", fontSize: 12, fontWeight: 600 }}
+              >
+                Ism <span style={{ color: "#f87171" }}>*</span>
               </Label>
               <input
                 type="text"
@@ -305,19 +512,25 @@ export function CustomersScreen() {
                 onChange={(e) =>
                   setNewCustomer({ ...newCustomer, name: e.target.value })
                 }
-                className={`w-full h-11 px-4 text-sm rounded-2xl outline-none bg-white/60 backdrop-blur border-white/50 text-slate-800 mt-1.5 ${
-                  formErrors.name ? "border-red-400 ring-1 ring-red-400" : ""
-                }`}
+                style={{
+                  ...INPUT_STYLE,
+                  marginTop: 6,
+                  borderColor: formErrors.name
+                    ? "#f87171"
+                    : "rgba(34,197,94,0.4)",
+                }}
               />
               {formErrors.name && (
-                <p className="text-xs text-red-500 mt-1">{formErrors.name}</p>
+                <div style={{ fontSize: 11, color: "#f87171", marginTop: 4 }}>
+                  {formErrors.name}
+                </div>
               )}
             </div>
-
-            {/* Phone */}
-            <div>
-              <Label className="text-xs font-bold text-slate-700">
-                Telefon <span className="text-red-500">*</span>
+            <div style={{ marginBottom: 16 }}>
+              <Label
+                style={{ color: "#86efac", fontSize: 12, fontWeight: 600 }}
+              >
+                Telefon <span style={{ color: "#f87171" }}>*</span>
               </Label>
               <input
                 type="tel"
@@ -326,18 +539,26 @@ export function CustomersScreen() {
                 onChange={(e) =>
                   setNewCustomer({ ...newCustomer, phone: e.target.value })
                 }
-                className={`w-full h-11 px-4 text-sm rounded-2xl outline-none bg-white/60 backdrop-blur border-white/50 text-slate-800 mt-1.5 ${
-                  formErrors.phone ? "border-red-400 ring-1 ring-red-400" : ""
-                }`}
+                style={{
+                  ...INPUT_STYLE,
+                  marginTop: 6,
+                  borderColor: formErrors.phone
+                    ? "#f87171"
+                    : "rgba(34,197,94,0.4)",
+                }}
               />
               {formErrors.phone && (
-                <p className="text-xs text-red-500 mt-1">{formErrors.phone}</p>
+                <div style={{ fontSize: 11, color: "#f87171", marginTop: 4 }}>
+                  {formErrors.phone}
+                </div>
               )}
             </div>
-
-            {/* Email */}
-            <div>
-              <Label className="text-xs font-bold text-slate-700">Email</Label>
+            <div style={{ marginBottom: 16 }}>
+              <Label
+                style={{ color: "#86efac", fontSize: 12, fontWeight: 600 }}
+              >
+                Email
+              </Label>
               <input
                 type="email"
                 placeholder="email@example.com"
@@ -345,13 +566,13 @@ export function CustomersScreen() {
                 onChange={(e) =>
                   setNewCustomer({ ...newCustomer, email: e.target.value })
                 }
-                className="w-full h-11 px-4 text-sm rounded-2xl outline-none bg-white/60 backdrop-blur border-white/50 text-slate-800 mt-1.5"
+                style={{ ...INPUT_STYLE, marginTop: 6 }}
               />
             </div>
-
-            {/* Company */}
-            <div>
-              <Label className="text-xs font-bold text-slate-700">
+            <div style={{ marginBottom: 16 }}>
+              <Label
+                style={{ color: "#86efac", fontSize: 12, fontWeight: 600 }}
+              >
                 Kompaniya
               </Label>
               <input
@@ -361,13 +582,15 @@ export function CustomersScreen() {
                 onChange={(e) =>
                   setNewCustomer({ ...newCustomer, company: e.target.value })
                 }
-                className="w-full h-11 px-4 text-sm rounded-2xl outline-none bg-white/60 backdrop-blur border-white/50 text-slate-800 mt-1.5"
+                style={{ ...INPUT_STYLE, marginTop: 6 }}
               />
             </div>
-
-            {/* Address */}
-            <div>
-              <Label className="text-xs font-bold text-slate-700">Manzil</Label>
+            <div style={{ marginBottom: 16 }}>
+              <Label
+                style={{ color: "#86efac", fontSize: 12, fontWeight: 600 }}
+              >
+                Manzil
+              </Label>
               <input
                 type="text"
                 placeholder="Shahar, ko'cha, uy"
@@ -375,47 +598,61 @@ export function CustomersScreen() {
                 onChange={(e) =>
                   setNewCustomer({ ...newCustomer, address: e.target.value })
                 }
-                className="w-full h-11 px-4 text-sm rounded-2xl outline-none bg-white/60 backdrop-blur border-white/50 text-slate-800 mt-1.5"
+                style={{ ...INPUT_STYLE, marginTop: 6 }}
               />
             </div>
-
-            {/* Note */}
-            <div>
-              <Label className="text-xs font-bold text-slate-700">Izoh</Label>
+            <div style={{ marginBottom: 20 }}>
+              <Label
+                style={{ color: "#86efac", fontSize: 12, fontWeight: 600 }}
+              >
+                Izoh
+              </Label>
               <Textarea
                 placeholder="Qo'shimcha ma'lumot..."
                 value={newCustomer.note}
                 onChange={(e) =>
                   setNewCustomer({ ...newCustomer, note: e.target.value })
                 }
-                className="resize-none rounded-2xl bg-white/60 backdrop-blur border-white/50 mt-1.5"
-                rows={3}
+                style={{
+                  ...INPUT_STYLE,
+                  marginTop: 6,
+                  minHeight: 80,
+                  borderRadius: 20,
+                }}
               />
             </div>
-
-            <div className="flex gap-3 pt-3">
-              <Button
-                variant="outline"
-                className="flex-1 h-11 rounded-2xl bg-white/40 border-white/50 text-slate-700"
+            <div style={{ display: "flex", gap: 12 }}>
+              <button
                 onClick={() => setCreateModalOpen(false)}
+                style={{ ...BUTTON_SECONDARY, flex: 1 }}
               >
                 Bekor qilish
-              </Button>
-              <Button
-                className="flex-1 h-11 rounded-2xl font-bold bg-indigo-500 hover:bg-indigo-600"
+              </button>
+              <button
                 onClick={handleCreateCustomer}
+                style={{ ...BUTTON_PRIMARY, flex: 1 }}
               >
                 Saqlash
-              </Button>
+              </button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Customer Detail Drawer */}
+      {selectedCustomer && (
+        <CustomerDetailDrawer
+          customer={selectedCustomer}
+          onClose={() => setSelectedCustomer(null)}
+        />
+      )}
     </div>
   );
 }
 
-// Customer Detail Drawer Component
+// --------------------------------------------------------------
+// Customer Detail Drawer (to‘liq qayta stilizatsiya)
+// --------------------------------------------------------------
 function CustomerDetailDrawer({
   customer,
   onClose,
@@ -432,138 +669,279 @@ function CustomerDetailDrawer({
 
   return (
     <Drawer open onClose={onClose}>
-      <DrawerContent className="max-h-[92vh] bg-white/80 backdrop-blur-3xl border-t border-white/60 shadow-2xl rounded-t-[32px]">
-        <DrawerHeader className="pb-2 pt-6 px-5">
-          <DrawerTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-6 rounded-full bg-indigo-500" />
-              <span className="text-lg font-bold text-slate-900">
+      <DrawerContent
+        style={{
+          background: "rgba(3,14,7,0.98)",
+          backdropFilter: "blur(32px)",
+          borderTop: "1px solid rgba(34,197,94,0.3)",
+          borderRadius: "32px 32px 0 0",
+        }}
+        className="[&>div]:bg-transparent"
+      >
+        <DrawerHeader
+          style={{
+            padding: "20px 20px 12px",
+            borderBottom: "1px solid rgba(34,197,94,0.2)",
+            position: "relative",
+          }}
+        >
+          <DrawerTitle
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div
+                style={{
+                  width: 4,
+                  height: 24,
+                  borderRadius: 2,
+                  background: "#4ade80",
+                }}
+              />
+              <span style={{ fontSize: 18, fontWeight: 800, color: "#ffffff" }}>
                 {customer.name}
               </span>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 rounded-full bg-white/40"
+            <button
               onClick={onClose}
+              style={{
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(34,197,94,0.3)",
+                borderRadius: "50%",
+                width: 32,
+                height: 32,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
             >
-              <X className="h-4 w-4" />
-            </Button>
+              <X size={16} color="#86efac" />
+            </button>
           </DrawerTitle>
         </DrawerHeader>
 
-        <div className="px-5 pb-8 overflow-y-auto space-y-5">
-          {/* Contact Info Card */}
-          <div
-            className={`bg-white/40 backdrop-blur rounded-2xl p-4 space-y-2`}
-          >
-            <div className="flex items-center gap-2 text-sm">
-              <Phone className="h-4 w-4 text-slate-500" />
-              <span className="text-slate-700">{customer.phone}</span>
+        <div
+          style={{
+            padding: "20px",
+            overflowY: "auto",
+            display: "flex",
+            flexDirection: "column",
+            gap: 20,
+          }}
+        >
+          {/* Contact Info */}
+          <div style={{ ...CARD, padding: "16px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                marginBottom: 12,
+              }}
+            >
+              <Phone size={14} color="#86efac" />
+              <span style={{ color: "#ffffff" }}>{customer.phone}</span>
             </div>
             {customer.email && (
-              <div className="flex items-center gap-2 text-sm">
-                <Mail className="h-4 w-4 text-slate-500" />
-                <span className="text-slate-700">{customer.email}</span>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  marginBottom: 12,
+                }}
+              >
+                <Mail size={14} color="#86efac" />
+                <span style={{ color: "#ffffff" }}>{customer.email}</span>
               </div>
             )}
             {customer.company && (
-              <div className="flex items-center gap-2 text-sm">
-                <Building2 className="h-4 w-4 text-slate-500" />
-                <span className="text-slate-700">{customer.company}</span>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  marginBottom: 12,
+                }}
+              >
+                <Building2 size={14} color="#86efac" />
+                <span style={{ color: "#ffffff" }}>{customer.company}</span>
               </div>
             )}
             {customer.address && (
-              <div className="flex items-start gap-2 text-sm">
-                <MapPin className="h-4 w-4 text-slate-500 mt-0.5" />
-                <span className="text-slate-700 flex-1">
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  marginBottom: 12,
+                }}
+              >
+                <MapPin size={14} color="#86efac" />
+                <span style={{ color: "#ffffff", flex: 1 }}>
                   {customer.address}
                 </span>
               </div>
             )}
             {customer.note && (
-              <div className="flex items-start gap-2 text-sm mt-2 pt-2 border-t border-white/30">
-                <FileText className="h-4 w-4 text-slate-500 mt-0.5" />
-                <span className="text-slate-700 flex-1">{customer.note}</span>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 8,
+                  marginTop: 8,
+                  paddingTop: 8,
+                  borderTop: "1px solid rgba(34,197,94,0.2)",
+                }}
+              >
+                <FileText size={14} color="#86efac" />
+                <span style={{ color: "#ffffffcc", flex: 1 }}>
+                  {customer.note}
+                </span>
               </div>
             )}
           </div>
 
           {/* Financial Stats */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white/40 backdrop-blur rounded-2xl p-3 text-center">
-              <p className="text-[11px] font-semibold text-slate-500 uppercase">
+          <div
+            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
+          >
+            <div style={{ ...CARD, padding: "12px", textAlign: "center" }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: "#86efac",
+                  marginBottom: 6,
+                }}
+              >
                 Qarzi
-              </p>
-              <p className="text-lg font-black text-red-600">
+              </div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: "#f87171" }}>
                 {formatCurrency(customer.debtAmount)}
-              </p>
+              </div>
             </div>
-            <div className="bg-white/40 backdrop-blur rounded-2xl p-3 text-center">
-              <p className="text-[11px] font-semibold text-slate-500 uppercase">
+            <div style={{ ...CARD, padding: "12px", textAlign: "center" }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: "#86efac",
+                  marginBottom: 6,
+                }}
+              >
                 Umumiy xarid
-              </p>
-              <p className="text-lg font-black text-indigo-600">
+              </div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: "#4ade80" }}>
                 {formatCurrency(totalSpent)}
-              </p>
+              </div>
             </div>
           </div>
 
-          {/* Order History */}
+          {/* Recent Orders */}
           {customerOrders.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <div>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: 1,
+                  color: "#86efac",
+                  marginBottom: 12,
+                }}
+              >
                 So'nggi buyurtmalar
-              </p>
-              {customerOrders.slice(0, 3).map((order) => (
-                <div
-                  key={order.id}
-                  className="bg-white/40 backdrop-blur rounded-2xl p-3 flex items-center justify-between"
-                >
-                  <div>
-                    <p className="text-xs font-mono font-semibold text-slate-600">
-                      {order.id}
-                    </p>
-                    <p className="text-[10px] text-slate-500">
-                      {order.createdAt}
-                    </p>
+              </div>
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 10 }}
+              >
+                {customerOrders.slice(0, 3).map((order) => (
+                  <div
+                    key={order.id}
+                    style={{
+                      ...CARD,
+                      padding: "12px",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 600,
+                          fontFamily: "monospace",
+                          color: "#86efac",
+                        }}
+                      >
+                        {order.id}
+                      </div>
+                      <div style={{ fontSize: 10, color: "#86efacb3" }}>
+                        {order.createdAt}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <div
+                        style={{
+                          fontSize: 14,
+                          fontWeight: 700,
+                          color: "#4ade80",
+                        }}
+                      >
+                        {formatCurrency(order.totalAmount)}
+                      </div>
+                      <Badge
+                        style={{
+                          background:
+                            order.status === "yetkazildi"
+                              ? "rgba(74,222,128,0.15)"
+                              : "rgba(251,146,60,0.15)",
+                          color:
+                            order.status === "yetkazildi"
+                              ? "#4ade80"
+                              : "#fb923c",
+                          border: "1px solid currentColor",
+                          fontSize: 9,
+                          padding: "2px 8px",
+                          borderRadius: 20,
+                        }}
+                      >
+                        {order.status === "yetkazildi"
+                          ? "Yetkazildi"
+                          : "Jarayonda"}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold text-indigo-600">
-                      {formatCurrency(order.totalAmount)}
-                    </p>
-                    <Badge
-                      className="text-[9px] px-2 py-0 h-4 rounded-full"
-                      style={{
-                        background:
-                          order.status === "yetkazildi"
-                            ? "rgba(34,197,94,0.1)"
-                            : "rgba(245,158,11,0.1)",
-                        color:
-                          order.status === "yetkazildi" ? "#16a34a" : "#d97706",
-                      }}
-                    >
-                      {order.status === "yetkazildi"
-                        ? "Yetkazildi"
-                        : "Jarayonda"}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
 
           {lastOrder && (
-            <div className="bg-gradient-to-r from-indigo-50 to-white/40 rounded-2xl p-4 flex items-center justify-between">
+            <div
+              style={{
+                ...CARD,
+                padding: "14px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
               <div>
-                <p className="text-[11px] font-semibold text-slate-500">
+                <div style={{ fontSize: 11, color: "#86efacb3" }}>
                   Oxirgi buyurtma
-                </p>
-                <p className="text-sm font-bold text-slate-800">
+                </div>
+                <div
+                  style={{ fontSize: 14, fontWeight: 700, color: "#ffffff" }}
+                >
                   {lastOrder.createdAt}
-                </p>
+                </div>
               </div>
-              <TrendingUp className="h-5 w-5 text-indigo-500" />
+              <TrendingUp size={20} color="#4ade80" />
             </div>
           )}
         </div>

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+/* @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -44,7 +44,7 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
-}
+} */
 
 /*
   ============================================================
@@ -78,7 +78,7 @@
 :root {
   --radius: 0.75rem;
   /* Modern gradient background - blue to purple */
-  --background: oklch(0.98 0.002 265);
+  --background: oklch(98.26% 0.0016 66.229);
   --foreground: oklch(0.12 0.01 260);
   /* Frosted glass card effect - semi-transparent white */
   --card: oklch(1 0 0 / 0.92);
@@ -154,11 +154,11 @@
   --sidebar-ring: oklch(0.439 0 0);
 }
 
-@layer base {
+/* @layer base {
   * {
     @apply border-border;
   }
   body {
     @apply bg-gradient-to-br from-[#D9EAFD] via-[#E4F2FA] to-[#E6E8FB] text-slate-800 min-h-screen antialiased bg-fixed;
   }
-}
+} */

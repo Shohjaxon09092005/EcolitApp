@@ -571,3 +571,43 @@ export function formatCurrency(amount: number): string {
     maximumFractionDigits: 0,
   }).format(amount) + " so'm"
 }
+// store.ts ichiga qo'shing:
+
+export interface SalesDataPoint {
+  name: string; // Dush, Sesh, yoki Yan, Fev...
+  amount: number; // Masalan: 80000000 (80M)
+}
+
+interface DashboardState {
+  salesPeriod: 'hafta' | 'oy';
+  setSalesPeriod: (period: 'hafta' | 'oy') => void;
+  // Rasmdagi grafik chizig'iga mos keluvchi realistik ma'lumotlar
+  weeklySalesData: SalesDataPoint[];
+  monthlySalesData: SalesDataPoint[];
+}
+
+export const useDashboardStore = create<DashboardState>((set) => ({
+  salesPeriod: 'hafta',
+  setSalesPeriod: (period) => set({ salesPeriod: period }),
+  
+  // Haftalik ma'lumotlar (Rasmdagi grafik to'lqiniga juda yaqin)
+  weeklySalesData: [
+    { name: 'Dush', amount: 85000000 },
+    { name: 'Sesh', amount: 120000000 },
+    { name: 'Chor', amount: 95000000 },
+    { name: 'Pay', amount: 150000000 },
+    { name: 'Jum', amount: 120000000 },
+    { name: 'Shan', amount: 70000000 },
+    { name: 'Yak', amount: 50000000 },
+  ],
+  
+  // Oylik ma'lumotlar (Namuna uchun)
+  monthlySalesData: [
+    { name: 'Yan', amount: 110000000 },
+    { name: 'Fev', amount: 140000000 },
+    { name: 'Mar', amount: 135000000 },
+    { name: 'Apr', amount: 160000000 },
+    { name: 'May', amount: 90000000 },
+    { name: 'Iyun', amount: 125000000 },
+  ]
+}));

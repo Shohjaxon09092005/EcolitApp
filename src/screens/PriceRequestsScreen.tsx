@@ -1,166 +1,270 @@
+// src/screens/PriceRequestsScreen.tsx
 import {
   Tag,
   CheckCircle2,
   XCircle,
   Clock,
   TrendingDown,
-} from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { useStore, formatCurrency, type PriceRequestStatus } from "@/lib/store"
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { useStore, formatCurrency, type PriceRequestStatus } from "@/lib/store";
 
-// Glassmorphism base class
-const glassCardClass = "bg-white/60 backdrop-blur-2xl border-white/50 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.05)] rounded-[28px] overflow-hidden border"
+// --------------------------------------------------------------
+// Dizayn tokenlari (dashboard bilan bir xil)
+// --------------------------------------------------------------
+const CARD = {
+  background: "rgba(9, 25, 13, 0.7)",
+  backdropFilter: "blur(12px)",
+  WebkitBackdropFilter: "blur(12px)",
+  border: "1px solid rgba(34, 197, 94, 0.25)",
+  borderRadius: 24,
+  boxShadow: "0 4px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.03)",
+} as const;
 
 const STATUS_CONFIG: Record<
   PriceRequestStatus,
-  { label: string; icon: React.ElementType; className: string }
+  { label: string; icon: React.ElementType; color: string; bg: string; border: string }
 > = {
   kutilmoqda: {
     label: "Kutilmoqda",
     icon: Clock,
-    className: "bg-amber-50/80 text-amber-700 border-amber-200/50",
+    color: "#fb923c",
+    bg: "rgba(251,146,60,0.15)",
+    border: "rgba(251,146,60,0.4)",
   },
   tasdiqlandi: {
     label: "Tasdiqlandi",
     icon: CheckCircle2,
-    className: "bg-green-50/80 text-green-700 border-green-200/50",
+    color: "#4ade80",
+    bg: "rgba(74,222,128,0.15)",
+    border: "rgba(74,222,128,0.4)",
   },
   rad_etildi: {
     label: "Rad etildi",
     icon: XCircle,
-    className: "bg-red-50/80 text-red-700 border-red-200/50",
+    color: "#f87171",
+    bg: "rgba(248,113,113,0.15)",
+    border: "rgba(248,113,113,0.4)",
   },
-}
+};
 
 export function PriceRequestsScreen() {
-  const { priceRequests } = useStore()
+  const { priceRequests } = useStore();
 
-  const pending = priceRequests.filter((r) => r.status === "kutilmoqda").length
-  const approved = priceRequests.filter((r) => r.status === "tasdiqlandi").length
-  const rejected = priceRequests.filter((r) => r.status === "rad_etildi").length
+  const pending = priceRequests.filter((r) => r.status === "kutilmoqda").length;
+  const approved = priceRequests.filter((r) => r.status === "tasdiqlandi").length;
+  const rejected = priceRequests.filter((r) => r.status === "rad_etildi").length;
 
   return (
-    <div className="flex flex-col h-full pb-28 px-1 pt-4 max-w-md mx-auto">
+    <div
+      style={{
+        padding: "16px 12px 112px",
+        maxWidth: 480,
+        margin: "0 auto",
+      }}
+    >
       {/* Header */}
-      <div className="mb-4 px-2">
-        <p className="text-xs font-semibold uppercase tracking-widest mb-0.5 text-slate-500">
+      <div style={{ marginBottom: 24, padding: "0 8px" }}>
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 600,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            color: "#86efac",
+            marginBottom: 6,
+          }}
+        >
           Narx so'rovlari
-        </p>
-        <h1 className="text-2xl font-bold text-slate-900">Narx So'rovlari</h1>
+        </div>
+        <h1
+          style={{
+            fontSize: 28,
+            fontWeight: 800,
+            color: "#ffffff",
+            letterSpacing: "-0.5px",
+          }}
+        >
+          Narx So'rovlari
+        </h1>
       </div>
 
-      {/* Summary Pills (Glass Cards) */}
-      <div className="grid grid-cols-3 gap-3 mb-5 px-2">
-        <Card className={`${glassCardClass} p-3`}>
-          <div className="flex flex-col items-center">
-            <div className="w-10 h-10 rounded-full bg-amber-100/70 flex items-center justify-center mb-2 shadow-sm">
-              <Clock className="h-5 w-5 text-amber-600" />
-            </div>
-            <p className="text-2xl font-black text-slate-900">{pending}</p>
-            <p className="text-[11px] font-semibold text-slate-500 mt-0.5">Kutilmoqda</p>
+      {/* Summary Cards */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 24, padding: "0 8px" }}>
+        <div style={{ ...CARD, padding: "14px", textAlign: "center" }}>
+          <div
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              background: "rgba(251,146,60,0.15)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 10px",
+            }}
+          >
+            <Clock size={20} color="#fb923c" />
           </div>
-        </Card>
-        <Card className={`${glassCardClass} p-3`}>
-          <div className="flex flex-col items-center">
-            <div className="w-10 h-10 rounded-full bg-green-100/70 flex items-center justify-center mb-2 shadow-sm">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
-            </div>
-            <p className="text-2xl font-black text-slate-900">{approved}</p>
-            <p className="text-[11px] font-semibold text-slate-500 mt-0.5">Tasdiqlandi</p>
+          <div style={{ fontSize: 28, fontWeight: 800, color: "#ffffff" }}>{pending}</div>
+          <div style={{ fontSize: 11, color: "#86efacb3", marginTop: 6 }}>Kutilmoqda</div>
+        </div>
+        <div style={{ ...CARD, padding: "14px", textAlign: "center" }}>
+          <div
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              background: "rgba(74,222,128,0.15)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 10px",
+            }}
+          >
+            <CheckCircle2 size={20} color="#4ade80" />
           </div>
-        </Card>
-        <Card className={`${glassCardClass} p-3`}>
-          <div className="flex flex-col items-center">
-            <div className="w-10 h-10 rounded-full bg-red-100/70 flex items-center justify-center mb-2 shadow-sm">
-              <XCircle className="h-5 w-5 text-red-600" />
-            </div>
-            <p className="text-2xl font-black text-slate-900">{rejected}</p>
-            <p className="text-[11px] font-semibold text-slate-500 mt-0.5">Rad etildi</p>
+          <div style={{ fontSize: 28, fontWeight: 800, color: "#ffffff" }}>{approved}</div>
+          <div style={{ fontSize: 11, color: "#86efacb3", marginTop: 6 }}>Tasdiqlandi</div>
+        </div>
+        <div style={{ ...CARD, padding: "14px", textAlign: "center" }}>
+          <div
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              background: "rgba(248,113,113,0.15)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 10px",
+            }}
+          >
+            <XCircle size={20} color="#f87171" />
           </div>
-        </Card>
+          <div style={{ fontSize: 28, fontWeight: 800, color: "#ffffff" }}>{rejected}</div>
+          <div style={{ fontSize: 11, color: "#86efacb3", marginTop: 6 }}>Rad etildi</div>
+        </div>
       </div>
 
       {/* Requests List */}
-      <div className="space-y-3 px-2">
+      <div style={{ display: "flex", flexDirection: "column", gap: 16, padding: "0 8px" }}>
         {priceRequests.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-20 h-20 rounded-3xl bg-white/60 backdrop-blur-2xl border-white/50 flex items-center justify-center mb-5 shadow-sm">
-              <Tag className="h-10 w-10 text-slate-400" />
-            </div>
-            <p className="font-bold text-slate-700">So'rovlar yo'q</p>
-            <p className="text-sm text-slate-500 mt-1">
+          <div style={{ textAlign: "center", padding: "48px 16px" }}>
+            <Tag size={48} style={{ marginBottom: 12, opacity: 0.5, color: "#86efac" }} />
+            <div style={{ fontWeight: 600, fontSize: 16, color: "#ffffff" }}>So'rovlar yo'q</div>
+            <div style={{ fontSize: 13, color: "#86efacb3", marginTop: 6 }}>
               Buyurtma yaratishda narx so'rovlari qo'shiladi
-            </p>
+            </div>
           </div>
         ) : (
           priceRequests.map((req) => {
-            const cfg = STATUS_CONFIG[req.status]
-            const Icon = cfg.icon
-            const discount = req.originalPrice - req.requestedPrice
-            const discountPct = Math.round((discount / req.originalPrice) * 100)
+            const cfg = STATUS_CONFIG[req.status];
+            const Icon = cfg.icon;
+            const discount = req.originalPrice - req.requestedPrice;
+            const discountPct = Math.round((discount / req.originalPrice) * 100);
 
             return (
-              <Card key={req.id} className={`${glassCardClass}`}>
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 mb-1.5">
-                        <Tag className="h-3.5 w-3.5 text-slate-400" />
-                        <p className="text-[11px] font-mono font-semibold text-slate-500">{req.id}</p>
-                        <span className="text-slate-300">·</span>
-                        <p className="text-[11px] text-slate-500">{req.createdAt}</p>
-                      </div>
-                      <p className="text-base font-bold text-slate-800 truncate">{req.productName}</p>
+              <div key={req.id} style={{ ...CARD, padding: "20px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                      <Tag size={12} color="#86efac" />
+                      <span style={{ fontSize: 11, fontFamily: "monospace", color: "#86efacb3" }}>{req.id}</span>
+                      <span style={{ color: "#86efacb3" }}>·</span>
+                      <span style={{ fontSize: 11, color: "#86efacb3" }}>{req.createdAt}</span>
                     </div>
-                    <span
-                      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-bold flex-shrink-0 ${cfg.className}`}
+                    <div style={{ fontSize: 16, fontWeight: 700, color: "#ffffff" }}>{req.productName}</div>
+                  </div>
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                      background: cfg.bg,
+                      border: `1px solid ${cfg.border}`,
+                      borderRadius: 40,
+                      padding: "4px 12px",
+                      fontSize: 10,
+                      fontWeight: 700,
+                      color: cfg.color,
+                    }}
+                  >
+                    <Icon size={12} />
+                    {cfg.label}
+                  </div>
+                </div>
+
+                {/* Price comparison */}
+                <div
+                  style={{
+                    background: "rgba(255,255,255,0.05)",
+                    borderRadius: 20,
+                    padding: "14px",
+                    marginBottom: 12,
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: "#86efac", marginBottom: 4 }}>Asl narx</div>
+                      <div style={{ fontSize: 14, fontWeight: 500, color: "#86efac80", textDecoration: "line-through" }}>
+                        {formatCurrency(req.originalPrice)}
+                      </div>
+                    </div>
+                    <TrendingDown size={16} color="#f87171" />
+                    <div style={{ flex: 1, textAlign: "right" }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: "#86efac", marginBottom: 4 }}>So'ralgan narx</div>
+                      <div style={{ fontSize: 16, fontWeight: 700, color: "#4ade80" }}>
+                        {formatCurrency(req.requestedPrice)}
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginTop: 12,
+                      paddingTop: 10,
+                      borderTop: "1px solid rgba(34,197,94,0.2)",
+                    }}
+                  >
+                    <span style={{ fontSize: 12, color: "#86efacb3" }}>Chegirma miqdori</span>
+                    <Badge
+                      style={{
+                        background: "rgba(248,113,113,0.15)",
+                        color: "#f87171",
+                        border: "1px solid rgba(248,113,113,0.4)",
+                        borderRadius: 30,
+                        fontSize: 11,
+                        fontWeight: 700,
+                        padding: "2px 10px",
+                      }}
                     >
-                      <Icon className="h-3 w-3" />
-                      {cfg.label}
-                    </span>
+                      -{formatCurrency(discount)} ({discountPct}%)
+                    </Badge>
                   </div>
+                </div>
 
-                  {/* Price comparison */}
-                  <div className="rounded-2xl bg-white/40 p-4 mt-2">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-1">
-                        <p className="text-[11px] font-semibold text-slate-500 mb-0.5">Asl narx</p>
-                        <p className="text-sm font-medium text-slate-400 line-through">
-                          {formatCurrency(req.originalPrice)}
-                        </p>
-                      </div>
-                      <TrendingDown className="h-4 w-4 text-red-500 flex-shrink-0" />
-                      <div className="flex-1 text-right">
-                        <p className="text-[11px] font-semibold text-slate-500 mb-0.5">So'ralgan narx</p>
-                        <p className="text-base font-bold text-indigo-600">
-                          {formatCurrency(req.requestedPrice)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="mt-3 flex items-center justify-between">
-                      <span className="text-xs text-slate-500">Chegirma miqdori</span>
-                      <Badge
-                        variant="destructive"
-                        className="text-xs py-0 h-5 rounded-full bg-red-100 text-red-700 border-red-200/50"
-                      >
-                        -{formatCurrency(discount)} ({discountPct}%)
-                      </Badge>
-                    </div>
+                {req.reason && (
+                  <div
+                    style={{
+                      background: "rgba(255,255,255,0.03)",
+                      borderRadius: 16,
+                      padding: "10px 12px",
+                      display: "flex",
+                      gap: 8,
+                    }}
+                  >
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "#86efac" }}>Sabab:</span>
+                    <span style={{ fontSize: 12, color: "#ffffffcc", flex: 1 }}>{req.reason}</span>
                   </div>
-
-                  {req.reason && (
-                    <div className="mt-3 flex items-start gap-1.5 p-2 rounded-xl bg-white/30">
-                      <p className="text-[11px] font-semibold text-slate-500">Sabab:</p>
-                      <p className="text-xs text-slate-700 flex-1">{req.reason}</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )
+                )}
+              </div>
+            );
           })
         )}
       </div>
     </div>
-  )
+  );
 }

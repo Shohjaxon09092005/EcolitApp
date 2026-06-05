@@ -1,20 +1,44 @@
-import { useState } from "react"
-import { Search, Car, Camera, CheckCircle2, FileText, Package, Clock, TrendingUp } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer"
-import { useStore, formatCurrency, type Order, type OrderStatus } from "@/lib/store"
-import { InvoiceSheet } from "./InvoiceSheet"
+// src/screens/OrdersScreen.tsx
+import { useState } from "react";
+import { Search, Car, Camera, CheckCircle2, FileText, Package, Clock, TrendingUp } from "lucide-react";
+import { useStore, formatCurrency, type Order, type OrderStatus } from "@/lib/store";
+import { InvoiceSheet } from "./InvoiceSheet";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 
-// Glassmorphism base class
-const glassCardClass = "bg-white/60 backdrop-blur-2xl border-white/50 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.05)] rounded-[28px] overflow-hidden border"
+// --------------------------------------------------------------
+// Dizayn tokenlari (dashboard bilan bir xil)
+// --------------------------------------------------------------
+const CARD = {
+  background: "rgba(9, 25, 13, 0.7)",
+  backdropFilter: "blur(12px)",
+  WebkitBackdropFilter: "blur(12px)",
+  border: "1px solid rgba(34, 197, 94, 0.2)",
+  borderRadius: 24,
+  boxShadow: "0 4px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.03)",
+} as const;
 
+const LABEL_SM = {
+  fontSize: 11,
+  fontWeight: 600,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase" as const,
+  color: "#86efac",
+};
+
+const TEXT_SECONDARY = {
+  color: "rgba(255, 255, 255, 0.5)",
+  fontSize: 12,
+  fontWeight: 500,
+};
+
+// const TEXT_PRIMARY = {
+//   color: "rgba(255, 255, 255, 0.9)",
+//   fontWeight: 700,
+// };
+
+// --------------------------------------------------------------
+// Filtrlar va status konfiguratsiyasi (ranglar yangilandi)
+// --------------------------------------------------------------
 const FILTERS: { key: string; label: string }[] = [
   { key: "all", label: "Barchasi" },
   { key: "kutilmoqda", label: "Kutilmoqda" },
@@ -23,166 +47,216 @@ const FILTERS: { key: string; label: string }[] = [
   { key: "yuklangan", label: "Yuklangan" },
   { key: "yetkazildi", label: "Yetkazildi" },
   { key: "rad_etildi", label: "Rad etildi" },
-]
+];
 
-const STATUS_CONFIG: Record<string, {
-  label: string
-  accentColor: string
-  bgColor: string
-  textColor: string
-  dotColor: string
-}> = {
+const STATUS_CONFIG: Record<
+  string,
+  { label: string; accentColor: string; bgColor: string; textColor: string; dotColor: string }
+> = {
   kutilmoqda: {
     label: "Kutilmoqda",
-    accentColor: "#f59e0b",
-    bgColor: "rgba(245,158,11,0.1)",
-    textColor: "#d97706",
-    dotColor: "#f59e0b",
+    accentColor: "#fb923c",
+    bgColor: "rgba(251,146,60,0.15)",
+    textColor: "#fb923c",
+    dotColor: "#fb923c",
   },
   tasdiqlangan: {
     label: "Tasdiqlangan",
-    accentColor: "#6366f1",
-    bgColor: "rgba(99,102,241,0.1)",
-    textColor: "#4f46e5",
-    dotColor: "#6366f1",
+    accentColor: "#60a5fa",
+    bgColor: "rgba(96,165,250,0.15)",
+    textColor: "#60a5fa",
+    dotColor: "#60a5fa",
   },
   yuklangan: {
     label: "Yuklangan",
-    accentColor: "#3b82f6",
-    bgColor: "rgba(59,130,246,0.1)",
-    textColor: "#2563eb",
-    dotColor: "#3b82f6",
+    accentColor: "#a78bfa",
+    bgColor: "rgba(167,139,250,0.15)",
+    textColor: "#a78bfa",
+    dotColor: "#a78bfa",
   },
   yetkazildi: {
     label: "Yetkazildi",
-    accentColor: "#22c55e",
-    bgColor: "rgba(34,197,94,0.1)",
-    textColor: "#16a34a",
-    dotColor: "#22c55e",
+    accentColor: "#4ade80",
+    bgColor: "rgba(74,222,128,0.15)",
+    textColor: "#4ade80",
+    dotColor: "#4ade80",
   },
   rad_etildi: {
     label: "Rad etildi",
-    accentColor: "#ef4444",
-    bgColor: "rgba(239,68,68,0.1)",
-    textColor: "#dc2626",
-    dotColor: "#ef4444",
+    accentColor: "#f87171",
+    bgColor: "rgba(248,113,113,0.15)",
+    textColor: "#f87171",
+    dotColor: "#f87171",
   },
   qarz_kutilmoqda: {
     label: "Qarz kutilmoqda",
     accentColor: "#f97316",
-    bgColor: "rgba(249,115,22,0.1)",
-    textColor: "#ea580c",
+    bgColor: "rgba(249,115,22,0.15)",
+    textColor: "#f97316",
     dotColor: "#f97316",
   },
-}
+};
 
 const DELIVERY_STEPS: { key: OrderStatus; label: string }[] = [
   { key: "kutilmoqda", label: "Kutilmoqda" },
   { key: "tasdiqlangan", label: "Tasdiqlandi" },
   { key: "yuklangan", label: "Yuklandi" },
   { key: "yetkazildi", label: "Yetkazildi" },
-]
+];
 
+// --------------------------------------------------------------
+// Asosiy komponent
+// --------------------------------------------------------------
 export function OrdersScreen() {
-  const { orders, updateOrderStatus } = useStore()
-  const [filter, setFilter] = useState("all")
-  const [search, setSearch] = useState("")
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
-  const [invoiceOrder, setInvoiceOrder] = useState<Order | null>(null)
-  const [carNumber, setCarNumber] = useState("")
+  const { orders, updateOrderStatus } = useStore();
+  const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [invoiceOrder, setInvoiceOrder] = useState<Order | null>(null);
+  const [carNumber, setCarNumber] = useState("");
 
   const filtered = orders.filter((o) => {
-    const matchFilter = filter === "all" || o.status === filter
+    const matchFilter = filter === "all" || o.status === filter;
     const matchSearch =
       search === "" ||
       o.id.toLowerCase().includes(search.toLowerCase()) ||
-      o.partnerName.toLowerCase().includes(search.toLowerCase())
-    return matchFilter && matchSearch
-  })
+      o.partnerName.toLowerCase().includes(search.toLowerCase());
+    return matchFilter && matchSearch;
+  });
 
   function handleStatusUpdate(orderId: string, status: OrderStatus, car?: string) {
-    updateOrderStatus(orderId, status, car)
+    updateOrderStatus(orderId, status, car);
     setSelectedOrder((prev) =>
       prev ? { ...prev, status, ...(car ? { carNumber: car } : {}) } : prev
-    )
+    );
   }
 
-  // Stats
-  const totalOrders = orders.length
-  const delivered = orders.filter((o) => o.status === "yetkazildi").length
-  const pending = orders.filter((o) => o.status === "kutilmoqda").length
+  const totalOrders = orders.length;
+  const delivered = orders.filter((o) => o.status === "yetkazildi").length;
+  const pending = orders.filter((o) => o.status === "kutilmoqda").length;
 
   return (
-    <div className="flex flex-col h-full pb-28 px-1 pt-4 max-w-md mx-auto">
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "transparent",
+        padding: "16px 12px 112px",
+        maxWidth: 480,
+        margin: "0 auto",
+        color: "#ffffff",
+      }}
+    >
       {/* Header */}
-      <div className="mb-4 px-2">
-        <p className="text-xs font-semibold uppercase tracking-widest mb-0.5 text-slate-500">
+      <div style={{ marginBottom: 24, padding: "0 8px" }}>
+        <div style={{ ...LABEL_SM, marginBottom: 6, fontSize: 12, color: "#86efac" }}>
           Buyurtmalarim
-        </p>
-        <h1 className="text-2xl font-bold text-slate-900">
+        </div>
+        <h1 style={{ fontSize: 28, fontWeight: 800, color: "#ffffff", letterSpacing: "-0.5px" }}>
           Buyurtmalar
         </h1>
       </div>
 
-      {/* Stats row with glass cards */}
-      <div className="grid grid-cols-3 gap-3 mb-5 px-2">
+      {/* Stats row (glass cards) */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 24, padding: "0 8px" }}>
         {[
-          { label: "Jami", value: totalOrders, icon: Package, color: "#6366f1", bg: "bg-indigo-100/70" },
-          { label: "Kutilmoqda", value: pending, icon: Clock, color: "#f59e0b", bg: "bg-amber-100/70" },
-          { label: "Yetkazildi", value: delivered, icon: TrendingUp, color: "#22c55e", bg: "bg-green-100/70" },
+          { label: "Jami", value: totalOrders, icon: Package, color: "#60a5fa", bg: "rgba(96,165,250,0.1)" },
+          { label: "Kutilmoqda", value: pending, icon: Clock, color: "#fb923c", bg: "rgba(251,146,60,0.1)" },
+          { label: "Yetkazildi", value: delivered, icon: TrendingUp, color: "#4ade80", bg: "rgba(74,222,128,0.1)" },
         ].map((s) => (
-          <Card key={s.label} className={`${glassCardClass} p-4`}>
-            <div className={`w-10 h-10 rounded-[14px] ${s.bg} flex items-center justify-center mb-3 shadow-sm`}>
-              <s.icon style={{ width: 18, height: 18, color: s.color }} />
+          <div
+            key={s.label}
+            style={{ ...CARD, padding: "14px 12px", textAlign: "center" }}
+          >
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 12,
+                background: s.bg,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 10px",
+              }}
+            >
+              <s.icon size={18} color={s.color} />
             </div>
-            <p className="text-2xl font-black text-slate-900 leading-none">{s.value}</p>
-            <p className="text-[11px] font-semibold text-slate-500 mt-1.5">{s.label}</p>
-          </Card>
+            <div style={{ fontSize: 24, fontWeight: 800, color: "#ffffff", lineHeight: 1.1 }}>
+              {s.value}
+            </div>
+            <div style={{ ...TEXT_SECONDARY, fontSize: 11, marginTop: 6 }}>{s.label}</div>
+          </div>
         ))}
       </div>
 
       {/* Search */}
-      <div className="relative mb-4 px-2">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-        <input
-          placeholder="Buyurtma ID yoki mijoz..."
-          className="w-full h-12 pl-10 pr-4 text-sm rounded-2xl outline-none transition-all bg-white/60 backdrop-blur-2xl border-white/50 shadow-[0_8px_20px_-10px_rgba(0,0,0,0.05)] text-slate-800 placeholder:text-slate-400"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      <div style={{ marginBottom: 20, padding: "0 8px" }}>
+        <div style={{ position: "relative" }}>
+          <Search size={16} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "#86efac80" }} />
+          <input
+            placeholder="Buyurtma ID yoki mijoz..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{
+              width: "100%",
+              height: 48,
+              paddingLeft: 42,
+              paddingRight: 16,
+              background: "rgba(9, 25, 13, 0.7)",
+              backdropFilter: "blur(8px)",
+              border: "1px solid rgba(34,197,94,0.3)",
+              borderRadius: 28,
+              fontSize: 14,
+              color: "#ffffff",
+              outline: "none",
+            }}
+          />
+        </div>
       </div>
 
-      {/* Filter Pills - hide scrollbar */}
-      <div className="flex gap-2 overflow-x-auto pb-3 mb-3 px-2 no-scrollbar">
+      {/* Filter pills */}
+      <div
+        style={{
+          display: "flex",
+          gap: 8,
+          overflowX: "auto",
+          padding: "0 8px 12px",
+          marginBottom: 8,
+          scrollbarWidth: "none",
+        }}
+        className="no-scrollbar"
+      >
         {FILTERS.map((f) => {
-          const isActive = filter === f.key
+          const isActive = filter === f.key;
           return (
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
-              className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all ${
-                isActive
-                  ? "bg-indigo-500 text-white shadow-md shadow-indigo-200/50"
-                  : "bg-white/60 backdrop-blur-2xl border-white/50 text-slate-600 hover:bg-white/80"
-              }`}
+              style={{
+                flexShrink: 0,
+                padding: "6px 18px",
+                borderRadius: 40,
+                fontSize: 13,
+                fontWeight: 600,
+                background: isActive ? "rgba(34,197,94,0.2)" : "rgba(9, 25, 13, 0.7)",
+                border: isActive ? "1px solid #4ade80" : "1px solid rgba(34,197,94,0.2)",
+                color: isActive ? "#4ade80" : "#ffffffcc",
+                transition: "all 0.2s",
+              }}
             >
               {f.label}
             </button>
-          )
+          );
         })}
       </div>
 
-      {/* Orders List */}
-      <div className="flex-1 overflow-y-auto space-y-3 px-2 pb-6">
+      {/* Orders list */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "0 8px" }}>
         {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-white/60 backdrop-blur-2xl border-white/50 flex items-center justify-center mb-4 shadow-sm">
-              <Package className="h-7 w-7 text-slate-400" />
-            </div>
-            <p className="font-bold text-slate-700">Buyurtma topilmadi</p>
-            <p className="text-sm text-slate-500 mt-1">
-              Filtrni o'zgartiring yoki yangi buyurtma yarating
-            </p>
+          <div style={{ textAlign: "center", padding: "48px 16px", color: "#86efac80" }}>
+            <Package size={48} style={{ marginBottom: 12, opacity: 0.5 }} />
+            <div style={{ fontWeight: 600, fontSize: 16 }}>Buyurtma topilmadi</div>
+            <div style={{ fontSize: 13, marginTop: 6 }}>Filtrni o‘zgartiring yoki yangi buyurtma yarating</div>
           </div>
         ) : (
           filtered.map((order) => {
@@ -190,69 +264,95 @@ export function OrdersScreen() {
               label: order.status,
               accentColor: "#888",
               bgColor: "rgba(150,150,150,0.1)",
-              textColor: "#666",
+              textColor: "#ccc",
               dotColor: "#888",
-            }
+            };
             return (
               <button
                 key={order.id}
-                className="w-full text-left transition-all active:scale-[0.98]"
                 onClick={() => {
-                  setSelectedOrder(order)
-                  setCarNumber("")
+                  setSelectedOrder(order);
+                  setCarNumber("");
                 }}
+                style={{ textAlign: "left", width: "100%", transition: "transform 0.1s" }}
+                className="active:scale-[0.98]"
               >
-                <Card className={`${glassCardClass} relative overflow-hidden`}>
-                  {/* Accent bar - full height from top to bottom */}
+                <div
+                  style={{
+                    ...CARD,
+                    position: "relative",
+                    overflow: "hidden",
+                    padding: "16px",
+                  }}
+                >
+                  {/* Accent bar */}
                   <div
-                    className="absolute top-0 bottom-0 left-0 w-1.5"
-                    style={{ background: cfg.accentColor }}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      bottom: 0,
+                      left: 0,
+                      width: 4,
+                      background: cfg.accentColor,
+                      boxShadow: `0 0 8px ${cfg.accentColor}`,
+                    }}
                   />
-                  <CardContent className="pl-5 pr-4 py-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
+                  <div style={{ marginLeft: 12 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                      <div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                          <span style={{ fontSize: 11, fontFamily: "monospace", background: "#1a2e22", padding: "2px 8px", borderRadius: 20, color: "#86efac" }}>
                             {order.id}
                           </span>
-                          <span className="text-[11px] font-medium text-slate-400">
-                            {order.createdAt}
-                          </span>
+                          <span style={{ fontSize: 11, color: "#86efac80" }}>{order.createdAt}</span>
                         </div>
-                        <p className="text-base font-bold text-slate-900 truncate">
-                          {order.partnerName}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-1">
-                          {order.items.length} ta mahsulot
-                        </p>
+                        <div style={{ fontSize: 16, fontWeight: 700, color: "#ffffff" }}>{order.partnerName}</div>
+                        <div style={{ fontSize: 12, color: "#86efacb3", marginTop: 4 }}>{order.items.length} ta mahsulot</div>
                       </div>
-
-                      <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                        <p className="text-base font-black" style={{ color: cfg.accentColor }}>
+                      <div style={{ textAlign: "right" }}>
+                        <div style={{ fontSize: 16, fontWeight: 800, color: cfg.accentColor }}>
                           {formatCurrency(order.totalAmount)}
-                        </p>
-                        <Badge
-                          className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold border-0"
-                          style={{ background: cfg.bgColor, color: cfg.textColor }}
+                        </div>
+                        <div
+                          style={{
+                            marginTop: 6,
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 6,
+                            background: cfg.bgColor,
+                            padding: "2px 10px",
+                            borderRadius: 30,
+                            fontSize: 10,
+                            fontWeight: 700,
+                            color: cfg.textColor,
+                          }}
                         >
-                          <span className="inline-block w-1.5 h-1.5 rounded-full mr-1.5" style={{ background: cfg.dotColor }} />
+                          <span style={{ width: 6, height: 6, borderRadius: "50%", background: cfg.dotColor }} />
                           {cfg.label}
-                        </Badge>
+                        </div>
                       </div>
                     </div>
-
                     {order.debtAmount > 0 && (
-                      <div className="mt-3 rounded-xl px-3 py-2 flex items-center justify-between text-xs bg-red-50/80 border border-red-100/50">
-                        <span className="text-red-600/80 font-medium">Qarz qoldig'i</span>
-                        <span className="font-bold text-red-500">
-                          {formatCurrency(order.debtAmount)}
-                        </span>
+                      <div
+                        style={{
+                          marginTop: 12,
+                          background: "rgba(248,113,113,0.1)",
+                          border: "1px solid rgba(248,113,113,0.3)",
+                          borderRadius: 16,
+                          padding: "8px 12px",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <span style={{ fontSize: 12, color: "#f87171" }}>Qarz qoldig‘i</span>
+                        <span style={{ fontWeight: 700, color: "#f87171" }}>{formatCurrency(order.debtAmount)}</span>
                       </div>
                     )}
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </button>
-            )
+            );
           })
         )}
       </div>
@@ -262,8 +362,8 @@ export function OrdersScreen() {
           order={selectedOrder}
           onClose={() => setSelectedOrder(null)}
           onViewInvoice={() => {
-            setInvoiceOrder(selectedOrder)
-            setSelectedOrder(null)
+            setInvoiceOrder(selectedOrder);
+            setSelectedOrder(null);
           }}
           onStatusUpdate={handleStatusUpdate}
           carNumber={carNumber}
@@ -271,16 +371,14 @@ export function OrdersScreen() {
         />
       )}
 
-      {invoiceOrder && (
-        <InvoiceSheet order={invoiceOrder} onClose={() => setInvoiceOrder(null)} />
-      )}
+      {invoiceOrder && <InvoiceSheet order={invoiceOrder} onClose={() => setInvoiceOrder(null)} />}
     </div>
-  )
+  );
 }
 
-// OrderDetailSheet remains unchanged (same as previous version) ...
-// (I'll include it below for completeness)
-
+// --------------------------------------------------------------
+// OrderDetailSheet (to‘liq qayta stilizatsiya qilingan)
+// --------------------------------------------------------------
 function OrderDetailSheet({
   order,
   onClose,
@@ -289,208 +387,291 @@ function OrderDetailSheet({
   carNumber,
   onCarNumberChange,
 }: {
-  order: Order
-  onClose: () => void
-  onViewInvoice: () => void
-  onStatusUpdate: (id: string, status: OrderStatus, car?: string) => void
-  carNumber: string
-  onCarNumberChange: (v: string) => void
+  order: Order;
+  onClose: () => void;
+  onViewInvoice: () => void;
+  onStatusUpdate: (id: string, status: OrderStatus, car?: string) => void;
+  carNumber: string;
+  onCarNumberChange: (v: string) => void;
 }) {
-  const currentStepIdx = DELIVERY_STEPS.findIndex((s) => s.key === order.status)
-  const nonDeliveryStatus = order.status === "rad_etildi" || order.status === "qarz_kutilmoqda"
+  const currentStepIdx = DELIVERY_STEPS.findIndex((s) => s.key === order.status);
+  const nonDeliveryStatus = order.status === "rad_etildi" || order.status === "qarz_kutilmoqda";
   const cfg = STATUS_CONFIG[order.status] ?? {
     accentColor: "#888",
     bgColor: "rgba(150,150,150,0.1)",
-    textColor: "#666",
-  }
+    textColor: "#ccc",
+  };
 
   return (
     <Drawer open onClose={onClose}>
-      <DrawerContent className="max-h-[92vh] bg-white/80 backdrop-blur-3xl border-t border-white/60 shadow-2xl rounded-t-[32px]">
-        <DrawerHeader className="pb-2 pt-6 px-5">
-          <DrawerTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-6 rounded-full" style={{ background: cfg.accentColor }} />
-              <span className="text-lg font-bold text-slate-900">{order.id}</span>
+      <DrawerContent
+        style={{
+          background: "rgba(3,14,7,0.98)",
+          backdropFilter: "blur(32px)",
+          borderTop: "1px solid rgba(34,197,94,0.3)",
+          borderRadius: "32px 32px 0 0",
+          maxHeight: "90vh",
+        }}
+        className="[&>div]:bg-transparent"
+      >
+        <DrawerHeader style={{ padding: "20px 20px 12px", borderBottom: "1px solid rgba(34,197,94,0.2)" }}>
+          <DrawerTitle style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 4, height: 24, borderRadius: 2, background: cfg.accentColor }} />
+              <span style={{ fontSize: 18, fontWeight: 800, color: "#ffffff" }}>{order.id}</span>
             </div>
-            <span className="text-xs font-medium text-slate-500">
-              {order.createdAt}
-            </span>
+            <span style={{ fontSize: 12, color: "#86efac80" }}>{order.createdAt}</span>
           </DrawerTitle>
-          <p className="text-sm text-slate-600 mt-1 ml-3.5">{order.partnerName}</p>
+          <p style={{ fontSize: 14, color: "#ffffffcc", marginTop: 6 }}>{order.partnerName}</p>
         </DrawerHeader>
 
-        <div className="px-5 pb-8 overflow-y-auto space-y-5">
+        <div style={{ padding: "16px 20px 24px", overflowY: "auto", display: "flex", flexDirection: "column", gap: 20 }}>
           {/* Stepper */}
           {!nonDeliveryStatus && (
-            <Card className={`${glassCardClass} p-5`}>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-4">
-                Yetkazish holati
-              </p>
-              <div className="flex items-center justify-between relative">
-                <div className="absolute top-4 left-4 right-4 h-0.5 bg-slate-200/80 rounded-full" />
+            <div style={{ ...CARD, padding: "16px" }}>
+              <div style={{ ...LABEL_SM, marginBottom: 12 }}>Yetkazish holati</div>
+              <div style={{ position: "relative", display: "flex", justifyContent: "space-between" }}>
+                <div style={{ position: "absolute", top: 16, left: 16, right: 16, height: 2, background: "rgba(107, 4, 4, 0.1)", borderRadius: 2 }} />
                 <div
-                  className="absolute top-4 left-4 h-0.5 rounded-full transition-all"
                   style={{
-                    background: cfg.accentColor,
+                    position: "absolute",
+                    top: 16,
+                    left: 16,
+                    height: 2,
                     width: currentStepIdx <= 0 ? "0%" : `${(currentStepIdx / (DELIVERY_STEPS.length - 1)) * 100}%`,
+                    background: cfg.accentColor,
+                    borderRadius: 2,
+                    transition: "width 0.3s",
                   }}
                 />
                 {DELIVERY_STEPS.map((step, i) => {
-                  const done = i <= currentStepIdx
-                  const active = i === currentStepIdx
+                  const done = i <= currentStepIdx;
+                  const active = i === currentStepIdx;
                   return (
-                    <div key={step.key} className="flex flex-col items-center z-10">
+                    <div key={step.key} style={{ display: "flex", flexDirection: "column", alignItems: "center", zIndex: 2 }}>
                       <div
-                        className="h-9 w-9 rounded-full border-2 flex items-center justify-center transition-all bg-white shadow-sm"
                         style={{
-                          borderColor: done ? cfg.accentColor : "rgba(0,0,0,0.12)",
-                          boxShadow: active ? `0 0 0 4px ${cfg.bgColor}` : "none",
+                          width: 32,
+                          height: 32,
+                          borderRadius: "50%",
+                          background: done ? cfg.accentColor : "rgba(255,255,255,0.05)",
+                          border: active ? `2px solid ${cfg.accentColor}` : "none",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: done ? "#000" : "#86efac80",
                         }}
                       >
-                        {done ? (
-                          <CheckCircle2 className="h-4 w-4" style={{ color: cfg.accentColor }} />
-                        ) : (
-                          <span className="text-xs font-bold text-slate-400">{i + 1}</span>
-                        )}
+                        {done ? <CheckCircle2 size={18} /> : <span style={{ fontSize: 12 }}>{i + 1}</span>}
                       </div>
-                      <p className="text-[10px] mt-1.5 font-semibold" style={{ color: done ? cfg.accentColor : "rgba(140,140,160,0.9)" }}>
+                      <div style={{ fontSize: 10, marginTop: 8, color: done ? cfg.accentColor : "#86efac80" }}>
                         {step.label}
-                      </p>
+                      </div>
                     </div>
-                  )
+                  );
                 })}
               </div>
-            </Card>
+            </div>
           )}
 
           {/* Items */}
-          <Card className={`${glassCardClass} p-5`}>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3">
-              Mahsulotlar
-            </p>
-            <div className="space-y-3">
-              {order.items.map((item, i) => (
-                <div key={i} className="flex items-center justify-between py-2">
-                  <div>
-                    <p className="text-sm font-bold text-slate-800">{item.product.name}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      {item.quantity} × {formatCurrency(item.requestedPrice ?? item.product.price)}
-                    </p>
+          <div style={{ ...CARD, padding: "16px" }}>
+            <div style={{ ...LABEL_SM, marginBottom: 12 }}>Mahsulotlar</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {order.items.map((item, idx) => {
+                const price = item.requestedPrice ?? item.product.price;
+                return (
+                  <div key={idx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 0" }}>
+                    <div>
+                      <div style={{ fontWeight: 600, color: "#fff" }}>{item.product.name}</div>
+                      <div style={{ fontSize: 11, color: "#86efac80" }}>
+                        {item.quantity} × {formatCurrency(price)}
+                      </div>
+                    </div>
+                    <div style={{ fontWeight: 700, color: cfg.accentColor }}>{formatCurrency(price * item.quantity)}</div>
                   </div>
-                  <p className="text-sm font-bold" style={{ color: cfg.accentColor }}>
-                    {formatCurrency((item.requestedPrice ?? item.product.price) * item.quantity)}
-                  </p>
-                </div>
-              ))}
+                );
+              })}
             </div>
-            <Separator className="my-3 bg-slate-200/60" />
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-sm text-slate-600">Jami</span>
-              <span className="font-black text-lg" style={{ color: cfg.accentColor }}>
-                {formatCurrency(order.totalAmount)}
-              </span>
+            <div style={{ height: 1, background: "rgba(34,197,94,0.2)", margin: "12px 0" }} />
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontWeight: 600, color: "#fff" }}>Jami</span>
+              <span style={{ fontSize: 18, fontWeight: 800, color: cfg.accentColor }}>{formatCurrency(order.totalAmount)}</span>
             </div>
-          </Card>
+          </div>
 
-          {/* Payment */}
-          <Card className={`${glassCardClass} p-5`}>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3">
-              To'lov ma'lumotlari
-            </p>
-            <div className="space-y-3">
-              {[
-                {
-                  label: "Usul",
-                  value: order.paymentMethod === "naqd" ? "Naqd" : order.paymentMethod === "plastik" ? "Plastik" : order.paymentMethod === "bank" ? "Bank" : "Qarz",
-                  color: undefined,
-                },
-                { label: "To'langan", value: formatCurrency(order.paidAmount), color: "#22c55e" },
-                ...(order.debtAmount > 0 ? [{ label: "Qarz", value: formatCurrency(order.debtAmount), color: "#ef4444" }] : []),
-                ...(order.dueDate ? [{ label: "Muddat", value: order.dueDate, color: undefined }] : []),
-              ].map((row) => (
-                <div key={row.label} className="flex justify-between items-center">
-                  <span className="text-sm text-slate-500">{row.label}</span>
-                  <span className="text-sm font-bold" style={{ color: row.color ?? "#1e293b" }}>
-                    {row.value}
-                  </span>
+          {/* Payment details */}
+          <div style={{ ...CARD, padding: "16px" }}>
+            <div style={{ ...LABEL_SM, marginBottom: 12 }}>To'lov ma'lumotlari</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={TEXT_SECONDARY}>Usul</span>
+                <span style={{ color: "#fff" }}>
+                  {order.paymentMethod === "naqd"
+                    ? "Naqd"
+                    : order.paymentMethod === "plastik"
+                    ? "Plastik"
+                    : order.paymentMethod === "bank"
+                    ? "Bank"
+                    : "Qarz"}
+                </span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={TEXT_SECONDARY}>To'langan</span>
+                <span style={{ color: "#4ade80" }}>{formatCurrency(order.paidAmount)}</span>
+              </div>
+              {order.debtAmount > 0 && (
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span style={TEXT_SECONDARY}>Qarz</span>
+                  <span style={{ color: "#f87171" }}>{formatCurrency(order.debtAmount)}</span>
                 </div>
-              ))}
+              )}
+              {order.dueDate && (
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span style={TEXT_SECONDARY}>Muddat</span>
+                  <span style={{ color: "#fff" }}>{order.dueDate}</span>
+                </div>
+              )}
             </div>
-          </Card>
+          </div>
 
-          {/* Actions */}
+          {/* Action buttons depending on status */}
           {order.status === "tasdiqlangan" && (
-            <div className="space-y-3">
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div>
-                <label className="text-xs font-bold text-slate-600 mb-1.5 flex items-center gap-1">
-                  <Car className="h-3.5 w-3.5" /> Mashina raqami
+                <label style={{ fontSize: 12, fontWeight: 600, color: "#86efac", marginBottom: 6, display: "block" }}>
+                  <Car size={14} style={{ display: "inline", marginRight: 4 }} /> Mashina raqami
                 </label>
                 <input
                   placeholder="01 A 123 BC"
                   value={carNumber}
                   onChange={(e) => onCarNumberChange(e.target.value)}
-                  className="w-full h-11 px-4 text-sm rounded-2xl outline-none bg-white/60 backdrop-blur-2xl border-white/50 shadow-sm text-slate-800 placeholder:text-slate-400"
+                  style={{
+                    width: "100%",
+                    padding: "10px 16px",
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(34,197,94,0.3)",
+                    borderRadius: 28,
+                    color: "#fff",
+                    outline: "none",
+                  }}
                 />
               </div>
               <button
-                className="w-full h-11 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.98] bg-white/60 backdrop-blur-2xl border-white/50 shadow-sm text-slate-700"
                 onClick={() => alert("Kamera ochilmoqda...")}
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(34,197,94,0.3)",
+                  borderRadius: 30,
+                  padding: "12px",
+                  fontWeight: 600,
+                  color: "#fff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                }}
               >
-                <Camera className="h-4 w-4" />
-                Rasm yuklash
+                <Camera size={16} /> Rasm yuklash
               </button>
               <button
-                className="w-full h-12 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 text-white transition-all active:scale-[0.98] shadow-lg"
-                style={{ background: cfg.accentColor }}
                 onClick={() => onStatusUpdate(order.id, "yuklangan", carNumber)}
+                style={{
+                  background: cfg.accentColor,
+                  border: "none",
+                  borderRadius: 30,
+                  padding: "14px",
+                  fontWeight: 700,
+                  color: "#000",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                }}
               >
-                <CheckCircle2 className="h-4 w-4" />
-                Yuklandi deb belgilash
+                <CheckCircle2 size={16} /> Yuklandi deb belgilash
               </button>
             </div>
           )}
 
           {order.status === "yuklangan" && (
-            <div className="space-y-3">
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <button
-                className="w-full h-11 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.98] bg-white/60 backdrop-blur-2xl border-white/50 shadow-sm text-slate-700"
                 onClick={() => alert("Kamera ochilmoqda...")}
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(34,197,94,0.3)",
+                  borderRadius: 30,
+                  padding: "12px",
+                  fontWeight: 600,
+                  color: "#fff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                }}
               >
-                <Camera className="h-4 w-4" />
-                Yetkazib berish rasmini yuklash
+                <Camera size={16} /> Yetkazib berish rasmini yuklash
               </button>
               <button
-                className="w-full h-12 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 text-white transition-all active:scale-[0.98] shadow-lg"
-                style={{ background: cfg.accentColor }}
                 onClick={() => onStatusUpdate(order.id, "yetkazildi")}
+                style={{
+                  background: cfg.accentColor,
+                  border: "none",
+                  borderRadius: 30,
+                  padding: "14px",
+                  fontWeight: 700,
+                  color: "#000",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                }}
               >
-                <CheckCircle2 className="h-4 w-4" />
-                Yetkazildi deb tasdiqlash
+                <CheckCircle2 size={16} /> Yetkazildi deb tasdiqlash
               </button>
             </div>
           )}
 
           {order.status === "kutilmoqda" && (
             <button
-              className="w-full h-12 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 text-white transition-all active:scale-[0.98] shadow-lg"
-              style={{ background: cfg.accentColor }}
               onClick={() => onStatusUpdate(order.id, "tasdiqlangan")}
+              style={{
+                background: cfg.accentColor,
+                border: "none",
+                borderRadius: 30,
+                padding: "14px",
+                fontWeight: 700,
+                color: "#000",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+              }}
             >
-              <CheckCircle2 className="h-4 w-4" />
-              Tasdiqlash
+              <CheckCircle2 size={16} /> Tasdiqlash
             </button>
           )}
 
           <button
-            className="w-full h-11 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.98] bg-white/60 backdrop-blur-2xl border-white/50 shadow-sm text-slate-700"
             onClick={onViewInvoice}
+            style={{
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(34,197,94,0.3)",
+              borderRadius: 30,
+              padding: "12px",
+              fontWeight: 600,
+              color: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+            }}
           >
-            <FileText className="h-4 w-4" />
-            Invoysni ko'rish
+            <FileText size={16} /> Invoysni ko'rish
           </button>
         </div>
       </DrawerContent>
     </Drawer>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState } from "react";
 import {
   TrendingUp,
   Wallet,
@@ -10,21 +10,11 @@ import {
   Award,
   DollarSign,
   Users,
-  PackageX,
+  // PackageX,
   BarChart3,
-  
-} from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  X,
+} from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   BarChart,
   Bar,
@@ -33,314 +23,1065 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-} from "recharts"
-import { useStore, formatCurrency, type SalaryInfo } from "@/lib/store"
+  AreaChart,
+  Area,
+} from "recharts";
+import {
+  useStore,
+  formatCurrency,
+  useDashboardStore,
+  type SalaryInfo,
+} from "@/lib/store";
 
-const MONTHS = ["Yan", "Fev", "Mar", "Apr", "May", "Iyn"]
+const MONTHS = ["Yan", "Fev", "Mar", "Apr", "May", "Iyn"];
 
-// Qayta ishlatiluvchi Glassmorphism (Shishasimon) sinfi
-const glassCardClass = "bg-white/60 backdrop-blur-2xl border-white/50 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.05)] rounded-[28px] overflow-hidden border"
+// ── Design Tokens ───────────────────────────────────────────
+const CARD = {
+  background: "rgba(255,255,255,0.04)",
+  backdropFilter: "blur(20px)",
+  WebkitBackdropFilter: "blur(20px)",
+  border: "1px solid rgba(34,197,94,0.12)",
+  borderRadius: 24,
+  boxShadow:
+    "0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05)",
+} as const;
+
+const CARD_GLOW = {
+  ...CARD,
+  boxShadow:
+    "0 4px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(34,197,94,0.15), inset 0 1px 0 rgba(34,197,94,0.08)",
+} as const;
+
+const LABEL_SM = {
+  fontSize: 11,
+  fontWeight: 600,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase" as const,
+  color: "rgba(74,222,128,0.6)",
+};
+
+const TEXT_SECONDARY = {
+  color: "rgba(255,255,255,0.45)",
+  fontSize: 12,
+  fontWeight: 500,
+};
+const TEXT_PRIMARY = { color: "rgba(255,255,255,0.9)", fontWeight: 700 };
+// ────────────────────────────────────────────────────────────
 
 export function DashboardScreen() {
+  const { salesPeriod, setSalesPeriod, weeklySalesData, monthlySalesData } =
+    useDashboardStore();
+    
+
+  const activeData =
+    salesPeriod === "hafta" ? weeklySalesData : monthlySalesData;
+
+  // YAxis raqamlarini "40M", "80M" ko'rinishiga keltirish uchun formatlovchi
+  const formatYAxis = (value: number) => {
+    if (value === 0) return "0";
+    return `${value / 1000000}M`;
+  };
   const {
     monthlyTarget,
     monthlyAchieved,
     monthlyRevenue,
     orders,
-    products,
+    // products,
     salaryInfo,
-  } = useStore()
-  const [salaryOpen, setSalaryOpen] = useState(false)
+    partners,
+    setActiveTab,
+  } = useStore();
+  // Qarzdor mijozlar statistikasi
+  const debtors = partners.filter((p) => p.debtAmount > 0);
+  // const debtorCount = debtors.length;
+  // const totalDebtFromPartners = debtors.reduce(
+  //   (sum, p) => sum + p.debtAmount,
+  //   0,
+  // );
+  // const topDebtor = debtors.sort((a, b) => b.debtAmount - a.debtAmount)[0];
+  // const avgDebt = debtorCount ? totalDebtFromPartners / debtorCount : 0;
+  const [salaryOpen, setSalaryOpen] = useState(false);
 
-  const progressPct = Math.min(100, Math.round((monthlyAchieved / monthlyTarget) * 100))
-  // const daysLeft = 26
+  const progressPct = Math.min(
+    100,
+    Math.round((monthlyAchieved / monthlyTarget) * 100),
+  );
   const totalDebt = orders
     .filter((o) => o.status !== "yetkazildi" && o.status !== "rad_etildi")
-    .reduce((s, o) => s + o.debtAmount, 0)
+    .reduce((s, o) => s + o.debtAmount, 0);
   const todaySales = orders
     .filter((o) => o.createdAt === new Date().toISOString().split("T")[0])
-    .reduce((s, o) => s + o.totalAmount, 0)
-  const monthOrders = orders.filter(
-    (o) => o.createdAt.startsWith("2026-06")
-  ).length
+    .reduce((s, o) => s + o.totalAmount, 0);
+  const monthOrders = orders.filter((o) =>
+    o.createdAt.startsWith("2026-06"),
+  ).length;
   const pendingPayments = orders
     .filter((o) => o.status === "qarz_kutilmoqda")
-    .reduce((s, o) => s + o.debtAmount, 0)
-
-  const lowStockProducts = products.filter((p) => p.stock <= p.minStock)
-
-  const totalFines = salaryInfo.fines.reduce((s, f) => s + f.amount, 0)
+    .reduce((s, o) => s + o.debtAmount, 0);
+  // const lowStockProducts = products.filter((p) => p.stock <= p.minStock);
+  const totalFines = salaryInfo.fines.reduce((s, f) => s + f.amount, 0);
   const netSalary =
     salaryInfo.baseSalary +
     salaryInfo.kpiBonus +
     salaryInfo.salesBonus +
     salaryInfo.collectionBonus -
-    totalFines
+    totalFines;
 
   const chartData = monthlyRevenue.map((val, i) => ({
     month: MONTHS[i],
     summa: Math.round(val / 1_000_000),
-  }))
+  }));
 
   const statCards = [
     {
       label: "Bugungi sotuv",
       value: formatCurrency(todaySales),
       icon: DollarSign,
-      color: "text-green-600",
-      bg: "bg-green-100/70",
+      accent: "#4ade80",
+      bg: "rgba(34,197,94,0.1)",
+      glow: "rgba(34,197,94,0.2)",
     },
     {
       label: "Oylik buyurtmalar",
       value: `${monthOrders} ta`,
       icon: ShoppingCart,
-      color: "text-blue-600",
-      bg: "bg-blue-100/70",
+      accent: "#60a5fa",
+      bg: "rgba(59,130,246,0.1)",
+      glow: "rgba(59,130,246,0.2)",
     },
     {
       label: "Kutilayotganlar",
       value: formatCurrency(pendingPayments),
       icon: Clock,
-      color: "text-orange-600",
-      bg: "bg-orange-100/70",
+      accent: "#fb923c",
+      bg: "rgba(249,115,22,0.1)",
+      glow: "rgba(249,115,22,0.2)",
     },
     {
       label: "Debitorlik",
       value: formatCurrency(totalDebt),
       icon: CreditCard,
-      color: "text-red-600",
-      bg: "bg-red-100/70",
+      accent: "#f87171",
+      bg: "rgba(239,68,68,0.1)",
+      glow: "rgba(239,68,68,0.2)",
     },
-  ]
+  ];
 
   return (
-    // Floating menu yopib qo'ymasligi uchun pb-28 (padding-bottom) berildi
-    <div className="flex flex-col gap-5 pb-28 px-1 pt-4 max-w-md mx-auto">
-      
-      {/* Header */}
-      <div className="flex items-center justify-between mb-2 px-2">
-        <div className="flex items-center gap-3">
-          <div className="h-12 w-12 rounded-full overflow-hidden shadow-md border-2 border-white">
-            <div className="h-full w-full bg-blue-600 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">SM</span>
-            </div>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 16,
+        paddingBottom: 112,
+        paddingTop: 8,
+        maxWidth: 440,
+        margin: "0 auto",
+      }}
+    >
+      {/* ── Header ── */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "4px 4px 8px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: "50%",
+              background: "linear-gradient(145deg, #16a34a, #15803d)",
+              border: "2px solid rgba(74,222,128,0.35)",
+              boxShadow: "0 0 16px rgba(34,197,94,0.3)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <span
+              style={{
+                color: "#fff",
+                fontWeight: 800,
+                fontSize: 16,
+                letterSpacing: 1,
+              }}
+            >
+              SM
+            </span>
           </div>
           <div>
-            <p className="text-sm text-slate-500 font-medium tracking-tight">Xayrli kun,</p>
-            <h1 className="text-xl font-bold text-slate-900 leading-none mt-0.5">Sarvar (Menejer)</h1>
+            <p style={{ ...TEXT_SECONDARY, marginBottom: 2 }}>Xayrli kun,</p>
+            <h1
+              style={{
+                color: "rgba(255,255,255,0.92)",
+                fontWeight: 800,
+                fontSize: 18,
+                lineHeight: 1,
+                margin: 0,
+              }}
+            >
+              Sarvar{" "}
+              <span
+                style={{
+                  color: "rgba(74,222,128,0.7)",
+                  fontWeight: 500,
+                  fontSize: 13,
+                }}
+              >
+                (Menejer)
+              </span>
+            </h1>
           </div>
+        </div>
+        {/* Live dot */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            background: "rgba(34,197,94,0.08)",
+            border: "1px solid rgba(34,197,94,0.2)",
+            borderRadius: 20,
+            padding: "5px 12px",
+          }}
+        >
+          <span
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              background: "#4ade80",
+              boxShadow: "0 0 6px #4ade80",
+              display: "inline-block",
+            }}
+          />
+          <span
+            style={{
+              color: "#4ade80",
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.05em",
+            }}
+          >
+            JONLI
+          </span>
         </div>
       </div>
-
-      {/* KPI Hero Card */}
-      <Card className={`${glassCardClass} rounded-[32px] p-6`}>
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <p className="text-slate-500 text-[13px] font-semibold uppercase tracking-wider mb-1">
-              {salaryInfo.month} oylik reja
-            </p>
-            <div className="flex items-baseline gap-2">
-              <p className="text-2xl font-black text-slate-900 tracking-tight">
-                {progressPct}%
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-1.5 bg-green-100/80 text-green-700 rounded-xl px-3 py-2 shadow-sm border border-green-200/50">
-            <TrendingUp className="h-4 w-4" />
-            <span className="text-sm font-bold">O'smoqda</span>
-          </div>
-        </div>
-
-        <Progress
-          value={progressPct}
-          className="h-2.5 bg-slate-200/50 [&>[data-slot=progress-indicator]]:bg-green-500 shadow-inner rounded-full"
+      {/* ── KPI HERO SALES CARD (RASMDAGI KOMBINATSIYA) ── */}
+      <div
+        style={{
+          // image_8c41b8.png rasmining o'ng tomonidagi juda to'q, sirli yashil fon
+          background: "linear-gradient(135deg, #036b2b 0%, #040806 100%)",
+          // Rasmdagi yorqin yashil rangdan ingichka premium chegara
+          border: "1px solid rgba(34, 197, 94, 0.2)",
+          borderRadius: 24,
+          padding: "26px 24px 22px",
+          boxShadow:
+            "0 25px 50px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.05)",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {/* Burchakdagi yorug'lik effekti (To'q fonda chiroyli neon bo'lib taraladi) */}
+        <div
+          style={{
+            position: "absolute",
+            top: -40,
+            right: -40,
+            width: 150,
+            height: 150,
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(34, 197, 94, 0.12) 0%, transparent 75%)",
+            filter: "blur(25px)",
+            pointerEvents: "none",
+          }}
         />
 
-        <div className="flex justify-between mt-5">
+        {/* Top row */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            marginBottom: 24,
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
           <div>
-            <p className="text-slate-500 text-xs font-medium mb-1">Yig'ilgan</p>
-            <p className="font-bold text-sm text-slate-900">{formatCurrency(monthlyAchieved)}</p>
+            <p
+              style={{
+                ...LABEL_SM,
+                marginBottom: 8,
+                fontSize: 13,
+                color: "rgba(255, 255, 255, 0.4)",
+                letterSpacing: "0.5px",
+              }}
+            >
+              {salaryInfo?.month || "Ushbu oy"} savdo rejasi
+            </p>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+              {/* Yorqin toza oq rangdagi ulkan raqam */}
+              <span
+                style={{
+                  fontSize: 56,
+                  fontWeight: 950,
+                  color: "#ffffff",
+                  lineHeight: 1,
+                  letterSpacing: "-2px",
+                }}
+              >
+                {progressPct}
+              </span>
+              {/* Rasmdagi yorqin yashil foiz belgisi */}
+              <span style={{ fontSize: 26, fontWeight: 800, color: "#22c55e" }}>
+                %
+              </span>
+            </div>
           </div>
-          <div className="text-right">
-            <p className="text-slate-500 text-xs font-medium mb-1">Maqsad</p>
-            <p className="font-bold text-sm text-slate-900">{formatCurrency(monthlyTarget)}</p>
+
+          {/* Status belgisi: To'q fon ustida rasmdagi yorqin yashil kombinatsiya */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              background: "rgba(34, 197, 94, 0.1)",
+              border: "1px solid rgba(34, 197, 94, 0.3)",
+              borderRadius: 14,
+              padding: "8px 14px",
+            }}
+          >
+            <TrendingUp style={{ width: 16, height: 16, color: "#22c55e" }} />
+            <span
+              style={{
+                color: "#22c55e",
+                fontSize: 13,
+                fontWeight: 800,
+                letterSpacing: "0.3px",
+              }}
+            >
+              O'smoqda
+            </span>
           </div>
         </div>
-      </Card>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-4">
-        {statCards.map((card) => (
-          <Card key={card.label} className={`${glassCardClass} p-5`}>
-            <div className={`h-10 w-10 rounded-[14px] ${card.bg} flex items-center justify-center mb-3 shadow-sm`}>
-              <card.icon className={`h-5 w-5 ${card.color}`} />
-            </div>
-            <p className="text-slate-500 text-xs font-semibold leading-tight mb-1.5">
-              {card.label}
+        {/* Progress bar */}
+        <div style={{ position: "relative", marginBottom: 22, zIndex: 1 }}>
+          <div
+            style={{
+              height: 10,
+              borderRadius: 9999,
+              background: "rgba(255, 255, 255, 0.03)", // Chuqur shaffof orqa foni
+              overflow: "hidden",
+              border: "1px solid rgba(255, 255, 255, 0.02)",
+            }}
+          >
+            {/* To'ldirish chizig'i: Aynan rasm dagi dumaloq tugmaning yorqin yashil rangi */}
+            <div
+              style={{
+                width: `${progressPct}%`,
+                height: "100%",
+                background: "linear-gradient(90deg, #16a34a, #22c55e)",
+                borderRadius: 9999,
+                boxShadow: "0 0 14px rgba(34, 197, 94, 0.5)",
+                transition: "width 1s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Bottom row */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <div>
+            <p
+              style={{
+                ...TEXT_SECONDARY,
+                marginBottom: 6,
+                fontSize: 12,
+                color: "rgba(255, 255, 255, 0.35)",
+              }}
+            >
+              Bajarilgan savdo
             </p>
-            <p className="font-black text-base text-slate-900 tracking-tight">{card.value}</p>
-          </Card>
+            {/* Rasmdagi yorqin yashil rang summani yaqqol ko'rsatib turadi */}
+            <p
+              style={{
+                color: "#22c55e",
+                fontWeight: 850,
+                fontSize: 18,
+                margin: 0,
+              }}
+            >
+              {formatCurrency(monthlyAchieved)}
+            </p>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <p
+              style={{
+                ...TEXT_SECONDARY,
+                marginBottom: 6,
+                fontSize: 12,
+                color: "rgba(255, 255, 255, 0.35)",
+              }}
+            >
+              Savdo maqsadi
+            </p>
+            {/* Maqsad oq rangda, lekin fonga singib ketmaydi */}
+            <p
+              style={{
+                color: "#ffffff",
+                fontWeight: 850,
+                fontSize: 18,
+                margin: 0,
+              }}
+            >
+              {formatCurrency(monthlyTarget)}
+            </p>
+          </div>
+        </div>
+      </div>
+      {/* ── Stats Grid 2x2 ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        {statCards.map((card) => (
+          <div
+            key={card.label}
+            style={{
+              ...CARD,
+              padding: "18px 16px",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            {/* bg glow blob */}
+            <div
+              style={{
+                position: "absolute",
+                top: -10,
+                right: -10,
+                width: 70,
+                height: 70,
+                borderRadius: "50%",
+                background: card.glow,
+                filter: "blur(20px)",
+                pointerEvents: "none",
+              }}
+            />
+            <div
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 12,
+                background: card.bg,
+                border: `1px solid ${card.accent}30`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 12,
+              }}
+            >
+              <card.icon
+                style={{ width: 18, height: 18, color: card.accent }}
+              />
+            </div>
+            <p style={{ ...TEXT_SECONDARY, marginBottom: 4 }}>{card.label}</p>
+            <p style={{ ...TEXT_PRIMARY, fontSize: 14, margin: 0 }}>
+              {card.value}
+            </p>
+          </div>
         ))}
       </div>
-
-      {/* Bar Chart */}
-      <Card className={`${glassCardClass} pt-4`}>
-        <CardHeader className="pb-4 px-5">
-          <CardTitle className="text-[15px] font-bold text-slate-900 flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-blue-600" />
+      {/* ── Bar Chart ── */}
+      <div style={{ ...CARD, padding: "18px 6px 16px" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            marginBottom: 14,
+            paddingLeft: 14,
+          }}
+        >
+          <BarChart3 style={{ width: 16, height: 16, color: "#4ade80" }} />
+          <span
+            style={{
+              color: "rgba(255,255,255,0.8)",
+              fontWeight: 700,
+              fontSize: 14,
+            }}
+          >
             So'nggi 6 oy tushumi (mln so'm)
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="px-2 pb-5">
-          <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
-              <XAxis
-                dataKey="month"
-                tick={{ fontSize: 11, fill: "#64748B", fontWeight: 600 }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                tick={{ fontSize: 11, fill: "#64748B", fontWeight: 600 }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip
-                formatter={(value) => [`${value} mln`, "Tushum"]}
-                contentStyle={{
-                  background: "rgba(255,255,255,0.9)",
-                  backdropFilter: "blur(8px)",
-                  border: "1px solid rgba(255,255,255,0.5)",
-                  borderRadius: "16px",
-                  fontSize: "13px",
-                  fontWeight: "bold",
-                  color: "#0F172A",
-                  boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)"
-                }}
-              />
-              <Bar
-                dataKey="summa"
-                fill="#3B82F6"
-                radius={[6, 6, 0, 0]}
-                barSize={28}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-
-      {/* Salary & Bonuses Widget */}
-      <Card className={glassCardClass}>
-        <CardHeader className="pb-3 pt-5 px-5">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-[15px] font-bold text-slate-900 flex items-center gap-2">
-              <Wallet className="h-4 w-4 text-green-600" />
-              Maosh hisob-kitobi
-            </CardTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-blue-600 bg-blue-50/50 hover:bg-blue-100 rounded-xl text-xs h-8 px-3 gap-1 font-semibold"
-              onClick={() => setSalaryOpen(true)}
+          </span>
+        </div>
+        <ResponsiveContainer width="100%" height={170}>
+          <BarChart
+            data={chartData}
+            margin={{ top: 4, right: 8, left: -24, bottom: 0 }}
+          >
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="rgba(255,255,255,0.05)"
+              vertical={false}
+            />
+            <XAxis
+              dataKey="month"
+              tick={{
+                fontSize: 11,
+                fill: "rgba(255,255,255,0.4)",
+                fontWeight: 600,
+              }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <YAxis
+              tick={{
+                fontSize: 11,
+                fill: "rgba(255,255,255,0.4)",
+                fontWeight: 600,
+              }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <Tooltip
+              formatter={(value) => [`${value} mln`, "Tushum"]}
+              contentStyle={{
+                background: "rgba(4,20,10,0.95)",
+                backdropFilter: "blur(12px)",
+                border: "1px solid rgba(34,197,94,0.25)",
+                borderRadius: 14,
+                fontSize: 12,
+                fontWeight: 700,
+                color: "#4ade80",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+              }}
+              cursor={{ fill: "rgba(34,197,94,0.05)" }}
+            />
+            <Bar
+              dataKey="summa"
+              fill="url(#barGrad)"
+              radius={[6, 6, 0, 0]}
+              barSize={26}
+            />
+            <defs>
+              <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#4ade80" stopOpacity={0.9} />
+                <stop offset="100%" stopColor="#16a34a" stopOpacity={0.6} />
+              </linearGradient>
+            </defs>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+      {/* ── Salary Widget ── */}
+      <div style={{ ...CARD_GLOW, padding: "18px 20px" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 16,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Wallet style={{ width: 16, height: 16, color: "#4ade80" }} />
+            <span
+              style={{
+                color: "rgba(255,255,255,0.85)",
+                fontWeight: 700,
+                fontSize: 14,
+              }}
             >
-              To'liq ko'rish
-              <ChevronRight className="h-3 w-3" />
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="px-5 pb-5 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-slate-500">Asosiy maosh</span>
-            <span className="font-bold text-sm text-slate-900">{formatCurrency(salaryInfo.baseSalary)}</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-slate-500 flex items-center gap-1.5">
-              <Award className="h-4 w-4 text-green-500" /> KPI bonus
+              Maosh hisob-kitobi
             </span>
-            <span className="font-bold text-sm text-green-600">
+          </div>
+          <button
+            onClick={() => setSalaryOpen(true)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              background: "rgba(34,197,94,0.1)",
+              border: "1px solid rgba(34,197,94,0.2)",
+              borderRadius: 10,
+              padding: "5px 10px",
+              cursor: "pointer",
+              color: "#4ade80",
+              fontSize: 11,
+              fontWeight: 700,
+            }}
+          >
+            Ko'rish <ChevronRight style={{ width: 12, height: 12 }} />
+          </button>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <span style={TEXT_SECONDARY}>Asosiy maosh</span>
+            <span
+              style={{
+                color: "rgba(255,255,255,0.8)",
+                fontWeight: 700,
+                fontSize: 13,
+              }}
+            >
+              {formatCurrency(salaryInfo.baseSalary)}
+            </span>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <span
+              style={{
+                ...TEXT_SECONDARY,
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+              }}
+            >
+              <Award style={{ width: 13, height: 13, color: "#4ade80" }} /> KPI
+              bonus
+            </span>
+            <span style={{ color: "#4ade80", fontWeight: 700, fontSize: 13 }}>
               +{formatCurrency(salaryInfo.kpiBonus)}
             </span>
           </div>
-          <Separator className="bg-slate-200/60 my-1" />
-          <div className="flex items-center justify-between mt-2 pt-1">
-            <span className="font-bold text-sm text-slate-900">Jami (taxminiy)</span>
-            <span className="font-black text-lg text-blue-600">
+          <div
+            style={{
+              height: 1,
+              background: "rgba(255,255,255,0.06)",
+              margin: "2px 0",
+            }}
+          />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <span
+              style={{
+                color: "rgba(255,255,255,0.7)",
+                fontWeight: 700,
+                fontSize: 13,
+              }}
+            >
+              Jami (taxminiy)
+            </span>
+            <span style={{ color: "#60a5fa", fontWeight: 900, fontSize: 17 }}>
               {formatCurrency(netSalary)}
             </span>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+      {/*savdo tahlili */}
+      <div
+        style={{
+          backgroundColor: "rgba(18, 74, 39, 0.2)", // Stats cardingiz foni (yoki loyihadagi ...CARD obyekti)
+          borderRadius: 24,
+          padding: "24px",
+          boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.15)",
+          marginBottom: "24px",
+          fontFamily: "sans-serif",
+          color: "#ffffff",
+          // ── Stats carddan ko'chirilgan muhim stillar ──
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {/* 🌌 bg glow blob (Stats cardingizdagi effekt, grafik rangiga mos yashil neon holatda) */}
+        <div
+          style={{
+            position: "absolute",
+            top: -20,
+            right: -20,
+            width: 130, // Katta card bo'lgani uchun blob o'lchami biroz kattalashtirildi
+            height: 130,
+            borderRadius: "50%",
+            background: "rgba(22, 163, 74, 0.3)", // Yashil neon glow effekti
+            filter: "blur(30px)",
+            pointerEvents: "none",
+            zIndex: 1, // Grafik ustiga chiqib ketmasligi uchun
+          }}
+        />
 
-      {/* Low Stock Alert */}
-      {lowStockProducts.length > 0 && (
-        <Card className={`${glassCardClass} border-l-4 border-l-orange-500`}>
-          <CardHeader className="pb-2 pt-4 px-5">
-            <CardTitle className="text-[15px] font-bold flex items-center gap-2 text-slate-900">
-              <AlertTriangle className="h-4 w-4 text-orange-500" />
-              Kam qoldiq ({lowStockProducts.length} mahsulot)
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-5 pb-5">
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-              {lowStockProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className="flex-shrink-0 bg-white/40 border border-white/60 shadow-sm rounded-2xl p-3.5 min-w-[140px]"
-                >
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <PackageX className="h-4 w-4 text-orange-500" />
-                    {product.stock === 0 ? (
-                      <Badge className="text-[10px] py-0 h-4.5 bg-red-100 text-red-600 border-none shadow-none rounded-md px-1.5">
-                        Tugagan
-                      </Badge>
-                    ) : (
-                      <Badge className="text-[10px] py-0 h-4.5 bg-orange-100 text-orange-600 border-none shadow-none rounded-md px-1.5">
-                        {product.stock} ta
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-xs font-bold text-slate-800 leading-tight">
-                    {product.name}
-                  </p>
-                </div>
-              ))}
+        {/* Kontentlarni glow'dan ustunroq ko'rsatish uchun wrapper */}
+        <div style={{ position: "relative", zIndex: 2 }}>
+          {/* Header: Sarlavha va Hafta/Oy Knopkalari */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: 24,
+              justifyContent: "space-between",
+            }}
+          >
+            <h3
+              style={{
+                margin: 0,
+                fontSize: 16,
+                fontWeight: 700,
+                color: "#ffffff", // 🌟 Yorqin oq matn
+              }}
+            >
+              Sotuv Dinamikasi
+            </h3>
+
+            {/* Hafta / Oy Switcher (Pill dizayn) */}
+            <div
+              style={{
+                display: "flex",
+                background: "#0f172a", // Ichki qorong'u fon
+                padding: 4,
+                borderRadius: 100,
+              }}
+            >
+              <button
+                onClick={() => setSalesPeriod("hafta")}
+                style={{
+                  border: "none",
+                  padding: "6px 16px",
+                  borderRadius: 100,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  backgroundColor:
+                    salesPeriod === "hafta"
+                      ? "rgba(34,197,94,0.2)"
+                      : "transparent",
+                  color: "#ffffff", // 🌟 Yorqin oq matn
+                  boxShadow:
+                    salesPeriod === "hafta"
+                      ? "0px 2px 8px rgba(0,0,0,0.2)"
+                      : "none",
+                  transition: "all 0.2s",
+                }}
+              >
+                Hafta
+              </button>
+              <button
+                onClick={() => setSalesPeriod("oy")}
+                style={{
+                  border: "none",
+                  padding: "6px 16px",
+                  borderRadius: 100,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  backgroundColor:
+                    salesPeriod === "oy" ? "#334155" : "transparent",
+                  color: "#ffffff", // 🌟 Yorqin oq matn
+                  boxShadow:
+                    salesPeriod === "oy"
+                      ? "0px 2px 8px rgba(0,0,0,0.2)"
+                      : "none",
+                  transition: "all 0.2s",
+                }}
+              >
+                Oy
+              </button>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
 
-      {/* Recent Orders */}
-      <Card className={glassCardClass}>
-        <CardHeader className="pb-3 pt-5 px-5">
-          <CardTitle className="text-[15px] font-bold text-slate-900 flex items-center gap-2">
-            <Users className="h-4 w-4 text-blue-600" />
+          {/* Grafik Qismi */}
+          <div style={{ width: "100%", height: 220 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={activeData}
+                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0.0} />
+                  </linearGradient>
+                </defs>
+
+                {/* Setka chiziqlari */}
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  stroke="#334155"
+                />
+
+                <XAxis
+                  dataKey="name"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: "#94a3b8", fontSize: 12, fontWeight: 500 }}
+                  dy={10}
+                />
+
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: "#94a3b8", fontSize: 12, fontWeight: 500 }}
+                  tickFormatter={formatYAxis}
+                  domain={[0, 160000000]}
+                  ticks={[0, 40000000, 80000000, 120000000, 160000000]}
+                />
+
+                {/* To'q fonli zamonaviy Tooltip */}
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#0f172a",
+                    borderRadius: 12,
+                    border: "1px solid #334155",
+                  }}
+                  labelStyle={{ color: "#94a3b8", fontWeight: "bold" }}
+                  itemStyle={{ color: "#22c55e" }}
+                  formatter={(value: any) => [
+                    `${Number(value).toLocaleString()} UZS`,
+                    "Sotuv",
+                  ]}
+                />
+
+                {/* Silliq chiziqli yashil Area */}
+                <Area
+                  type="monotone"
+                  dataKey="amount"
+                  stroke="#22c55e"
+                  strokeWidth={2.5}
+                  fillOpacity={1}
+                  fill="url(#colorSales)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+      {/* // ================== QARZDORLAR RO'YXATI KARTOCHKASI ==================
+      // (Joylashtirish: masalan, Maosh widgeti va Savdo dinamikasi orasiga) */}
+      <div style={{ ...CARD, padding: "18px 20px" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 16,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <AlertTriangle
+              style={{ width: 16, height: 16, color: "#fb923c" }}
+            />
+            <span
+              style={{
+                color: "rgba(255,255,255,0.85)",
+                fontWeight: 700,
+                fontSize: 14,
+              }}
+            >
+              Eng katta qarzdorlar
+            </span>
+          </div>
+          <button
+            onClick={() => setActiveTab("customers")} // customers tabiga o'tish
+            style={{
+              background: "rgba(34,197,94,0.1)",
+              border: "1px solid rgba(34,197,94,0.3)",
+              borderRadius: 20,
+              padding: "6px 14px",
+              fontSize: 11,
+              fontWeight: 700,
+              color: "#4ade80",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            Umumiy ko‘rish <ChevronRight size={14} />
+          </button>
+        </div>
+
+        {debtors.length === 0 ? (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "24px 0",
+              color: "#a3e635",
+              fontWeight: 500,
+            }}
+          >
+            🎉 Qarzdor mijozlar mavjud emas!
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {debtors.slice(0, 3).map((debtor, idx) => (
+              <div
+                key={debtor.id}
+                style={{
+                  background: "rgba(34,197,94,0.05)",
+                  borderRadius: 16,
+                  padding: "12px 14px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  border: "1px solid rgba(34,197,94,0.1)",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: "50%",
+                      background:
+                        idx === 0
+                          ? "#fbbf24"
+                          : idx === 1
+                            ? "#94a3b8"
+                            : "#cd7f32",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 12,
+                      fontWeight: 800,
+                      color: "#0a0f1a",
+                    }}
+                  >
+                    {idx + 1}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, color: "#ffffff" }}>
+                      {debtor.name}
+                    </div>
+                    <div
+                      style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}
+                    >
+                      {debtor.phone}
+                    </div>
+                  </div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div
+                    style={{ fontSize: 14, fontWeight: 800, color: "#f87171" }}
+                  >
+                    {formatCurrency(debtor.debtAmount)}
+                  </div>
+                  <div style={{ fontSize: 10, color: "#fb923c" }}>
+                    Limit: {formatCurrency(debtor.debtLimit)}
+                  </div>
+                </div>
+              </div>
+            ))}
+            {debtors.length > 3 && (
+              <div style={{ textAlign: "center", marginTop: 4 }}>
+                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>
+                  + {debtors.length - 3} ta yana qarzdor
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+      {/* ── Recent Orders ── */}
+      <div style={{ ...CARD, padding: "18px 18px 12px" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            marginBottom: 14,
+          }}
+        >
+          <Users style={{ width: 15, height: 15, color: "#60a5fa" }} />
+          <span
+            style={{
+              color: "rgba(255,255,255,0.8)",
+              fontWeight: 700,
+              fontSize: 14,
+            }}
+          >
             So'nggi buyurtmalar
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="px-5 pb-3">
-          {orders.slice(0, 4).map((order) => (
+          </span>
+        </div>
+        <div>
+          {orders.slice(0, 4).map((order, i) => (
             <div
               key={order.id}
-              className="flex items-center justify-between py-3 border-b border-slate-100 last:border-0"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "11px 0",
+                borderBottom:
+                  i < 3 ? "1px solid rgba(255,255,255,0.05)" : "none",
+              }}
             >
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-bold text-slate-900 truncate">
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: "rgba(255,255,255,0.85)",
+                    margin: 0,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   {order.partnerName}
                 </p>
-                <p className="text-[11px] font-semibold text-slate-400 mt-0.5">{order.id} · {order.createdAt}</p>
+                <p
+                  style={{
+                    fontSize: 10,
+                    color: "rgba(255,255,255,0.3)",
+                    marginTop: 3,
+                    margin: "3px 0 0",
+                  }}
+                >
+                  {order.id} · {order.createdAt}
+                </p>
               </div>
-              <div className="flex flex-col items-end gap-1.5 ml-3">
-                <p className="text-sm font-black text-slate-900">{formatCurrency(order.totalAmount)}</p>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-end",
+                  gap: 5,
+                  marginLeft: 12,
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 800,
+                    color: "rgba(255,255,255,0.85)",
+                    margin: 0,
+                  }}
+                >
+                  {formatCurrency(order.totalAmount)}
+                </p>
                 <StatusBadge status={order.status} />
               </div>
             </div>
           ))}
-        </CardContent>
-      </Card>
-
-
-      {/* Salary Detail Modal */}
+        </div>
+      </div>
+      {/* ── Salary Modal ── */}
       <SalaryDetailModal
         open={salaryOpen}
         onClose={() => setSalaryOpen(false)}
@@ -350,30 +1091,80 @@ export function DashboardScreen() {
         kpiPercent={progressPct}
       />
     </div>
-  )
+  );
 }
 
+// ── Status Badge ──────────────────────────────────────────────
 function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, { label: string; className: string }> = {
-    kutilmoqda: { label: "Kutilmoqda", className: "bg-orange-100 text-orange-700" },
-    tasdiqlangan: { label: "Tasdiqlangan", className: "bg-blue-100 text-blue-700" },
-    yuklangan: { label: "Yuklangan", className: "bg-indigo-100 text-indigo-700" },
-    yetkazildi: { label: "Yetkazildi", className: "bg-green-100 text-green-700" },
-    rad_etildi: { label: "Rad etildi", className: "bg-red-100 text-red-700" },
-    qarz_kutilmoqda: { label: "Qarz", className: "bg-yellow-100 text-yellow-700" },
-  }
-  const s = map[status] ?? { label: status, className: "bg-slate-100 text-slate-600" }
+  const map: Record<
+    string,
+    { label: string; color: string; bg: string; border: string }
+  > = {
+    kutilmoqda: {
+      label: "Kutilmoqda",
+      color: "#fb923c",
+      bg: "rgba(249,115,22,0.1)",
+      border: "rgba(249,115,22,0.25)",
+    },
+    tasdiqlangan: {
+      label: "Tasdiqlangan",
+      color: "#60a5fa",
+      bg: "rgba(59,130,246,0.1)",
+      border: "rgba(59,130,246,0.25)",
+    },
+    yuklangan: {
+      label: "Yuklangan",
+      color: "#a78bfa",
+      bg: "rgba(139,92,246,0.1)",
+      border: "rgba(139,92,246,0.25)",
+    },
+    yetkazildi: {
+      label: "Yetkazildi",
+      color: "#4ade80",
+      bg: "rgba(34,197,94,0.1)",
+      border: "rgba(34,197,94,0.25)",
+    },
+    rad_etildi: {
+      label: "Rad etildi",
+      color: "#f87171",
+      bg: "rgba(239,68,68,0.1)",
+      border: "rgba(239,68,68,0.25)",
+    },
+    qarz_kutilmoqda: {
+      label: "Qarz",
+      color: "#fbbf24",
+      bg: "rgba(245,158,11,0.1)",
+      border: "rgba(245,158,11,0.25)",
+    },
+  };
+  const s = map[status] ?? {
+    label: status,
+    color: "rgba(255,255,255,0.5)",
+    bg: "rgba(255,255,255,0.05)",
+    border: "rgba(255,255,255,0.1)",
+  };
   return (
     <span
-      className={`inline-flex items-center rounded-lg px-2 py-1 text-[10px] font-bold tracking-wide uppercase ${s.className}`}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        borderRadius: 8,
+        padding: "3px 7px",
+        fontSize: 9,
+        fontWeight: 800,
+        letterSpacing: "0.06em",
+        textTransform: "uppercase",
+        color: s.color,
+        background: s.bg,
+        border: `1px solid ${s.border}`,
+      }}
     >
       {s.label}
     </span>
-  )
+  );
 }
 
-import { X } from "lucide-react" // make sure this import exists
-
+// ── Salary Detail Modal ───────────────────────────────────────
 function SalaryDetailModal({
   open,
   onClose,
@@ -382,129 +1173,340 @@ function SalaryDetailModal({
   totalFines,
   kpiPercent,
 }: {
-  open: boolean
-  onClose: () => void
-  salaryInfo: SalaryInfo
-  netSalary: number
-  totalFines: number
-  kpiPercent: number
+  open: boolean;
+  onClose: () => void;
+  salaryInfo: SalaryInfo;
+  netSalary: number;
+  totalFines: number;
+  kpiPercent: number;
 }) {
   const rows = [
-    { label: "Asosiy maosh", amount: salaryInfo.baseSalary, type: "base", note: "Belgilangan stavka" },
+    {
+      label: "Asosiy maosh",
+      amount: salaryInfo.baseSalary,
+      note: "Belgilangan stavka",
+    },
     {
       label: "KPI bonusi",
       amount: salaryInfo.kpiBonus,
-      type: "bonus",
       note: `KPI bajarilishi: ${kpiPercent}%`,
     },
     {
       label: "Sotuv bonusi",
       amount: salaryInfo.salesBonus,
-      type: "bonus",
       note: "Oylik sotuv hajmiga qarab",
     },
     {
       label: "Inkassatsiya bonusi",
       amount: salaryInfo.collectionBonus,
-      type: "bonus",
       note: "Qarzlarni yig'ish samaradorligi",
     },
-  ]
+  ];
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent 
-        className="sm:max-w-md w-[calc(100%-32px)] max-h-[85vh] bg-white/80 backdrop-blur-3xl border-white/60 shadow-2xl rounded-[32px] overflow-hidden p-0 gap-0 [&>button:first-child]:hidden"
+      <DialogContent
+        className="sm:max-w-md w-[calc(100%-32px)] max-h-[85vh] overflow-hidden p-0 gap-0 [&>button:first-child]:hidden"
+        style={{
+          background: "rgba(3,14,7,0.97)",
+          backdropFilter: "blur(32px)",
+          border: "1px solid rgba(34,197,94,0.2)",
+          borderRadius: 28,
+          boxShadow:
+            "0 24px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(34,197,94,0.1)",
+        }}
       >
-        <div className="flex flex-col h-full">
-          <DialogHeader className="p-5 pb-3 bg-white/40 sticky top-0 z-10 relative">
-            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-slate-900">
-              <Wallet className="h-5 w-5 text-blue-600" />
-              To'liq maosh hisob-kitobi
-            </DialogTitle>
-            <p className="text-[13px] font-semibold text-slate-500 mt-1">{salaryInfo.month}</p>
-            {/* Custom close button (now the only one) */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            maxHeight: "85vh",
+          }}
+        >
+          {/* Header */}
+          <div
+            style={{
+              padding: "20px 20px 16px",
+              borderBottom: "1px solid rgba(255,255,255,0.06)",
+              position: "relative",
+              background: "rgba(34,197,94,0.04)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                marginBottom: 4,
+              }}
+            >
+              <Wallet style={{ width: 18, height: 18, color: "#4ade80" }} />
+              <span
+                style={{
+                  color: "rgba(255,255,255,0.9)",
+                  fontWeight: 800,
+                  fontSize: 16,
+                }}
+              >
+                To'liq maosh hisob-kitobi
+              </span>
+            </div>
+            <p
+              style={{
+                color: "rgba(74,222,128,0.6)",
+                fontSize: 12,
+                fontWeight: 600,
+                margin: 0,
+              }}
+            >
+              {salaryInfo.month}
+            </p>
             <button
               onClick={onClose}
-              className="absolute right-4 top-4 rounded-full p-1.5 bg-white/40 hover:bg-white/60 transition-colors z-20"
+              style={{
+                position: "absolute",
+                top: 16,
+                right: 16,
+                width: 30,
+                height: 30,
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+              }}
             >
-              <X className="h-4 w-4 text-slate-500" />
+              <X
+                style={{
+                  width: 14,
+                  height: 14,
+                  color: "rgba(255,255,255,0.5)",
+                }}
+              />
             </button>
-          </DialogHeader>
+          </div>
 
-          <div className="p-5 pt-2 space-y-5 overflow-y-auto">
-            {/* rest of the content unchanged */}
-            <div className="space-y-2.5">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-2 ml-1">
-                Daromadlar
-              </p>
-              {rows.map((row) => (
-                <div
-                  key={row.label}
-                  className="rounded-xl bg-white/50 border border-white/60 p-3 flex items-start justify-between gap-2 shadow-sm"
-                >
-                  <div className="flex-1">
-                    <p className="text-sm font-bold text-slate-800">{row.label}</p>
-                    <p className="text-[10px] font-semibold text-slate-400 mt-0.5">{row.note}</p>
+          {/* Scrollable body */}
+          <div
+            style={{
+              padding: "16px 20px 20px",
+              overflowY: "auto",
+              display: "flex",
+              flexDirection: "column",
+              gap: 16,
+            }}
+          >
+            {/* Income rows */}
+            <div>
+              <p style={{ ...LABEL_SM, marginBottom: 10 }}>Daromadlar</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {rows.map((row) => (
+                  <div
+                    key={row.label}
+                    style={{
+                      background: "rgba(34,197,94,0.05)",
+                      border: "1px solid rgba(34,197,94,0.1)",
+                      borderRadius: 14,
+                      padding: "12px 14px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 8,
+                    }}
+                  >
+                    <div style={{ flex: 1 }}>
+                      <p
+                        style={{
+                          color: "rgba(255,255,255,0.8)",
+                          fontWeight: 700,
+                          fontSize: 13,
+                          margin: 0,
+                        }}
+                      >
+                        {row.label}
+                      </p>
+                      <p
+                        style={{
+                          color: "rgba(255,255,255,0.3)",
+                          fontSize: 10,
+                          margin: "3px 0 0",
+                        }}
+                      >
+                        {row.note}
+                      </p>
+                    </div>
+                    <span
+                      style={{
+                        color: "#4ade80",
+                        fontWeight: 800,
+                        fontSize: 13,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      +{formatCurrency(row.amount)}
+                    </span>
                   </div>
-                  <span className="text-sm font-black text-green-600 whitespace-nowrap ml-2">
-                    +{formatCurrency(row.amount)}
-                  </span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
-            <div className="space-y-2.5">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-2 ml-1">
+            {/* Fines */}
+            <div>
+              <p
+                style={{
+                  ...LABEL_SM,
+                  color: "rgba(248,113,113,0.6)",
+                  marginBottom: 10,
+                }}
+              >
                 Jarimalar
               </p>
-              {salaryInfo.fines.map((fine) => (
-                <div
-                  key={fine.id}
-                  className="rounded-xl bg-red-50/50 border border-red-100/50 p-3 shadow-sm"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1">
-                      <p className="text-sm font-bold text-red-600">{fine.reason}</p>
-                      <p className="text-[10px] font-semibold text-red-400 mt-0.5">{fine.date}</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {salaryInfo.fines.map((fine) => (
+                  <div
+                    key={fine.id}
+                    style={{
+                      background: "rgba(239,68,68,0.05)",
+                      border: "1px solid rgba(239,68,68,0.15)",
+                      borderRadius: 14,
+                      padding: "12px 14px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 8,
+                    }}
+                  >
+                    <div style={{ flex: 1 }}>
+                      <p
+                        style={{
+                          color: "#f87171",
+                          fontWeight: 700,
+                          fontSize: 13,
+                          margin: 0,
+                        }}
+                      >
+                        {fine.reason}
+                      </p>
+                      <p
+                        style={{
+                          color: "rgba(248,113,113,0.4)",
+                          fontSize: 10,
+                          margin: "3px 0 0",
+                        }}
+                      >
+                        {fine.date}
+                      </p>
                     </div>
-                    <span className="text-sm font-black text-red-600 whitespace-nowrap ml-2">
+                    <span
+                      style={{
+                        color: "#f87171",
+                        fontWeight: 800,
+                        fontSize: 13,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
                       -{formatCurrency(fine.amount)}
                     </span>
                   </div>
-                </div>
-              ))}
-              {salaryInfo.fines.length === 0 && (
-                <div className="rounded-xl bg-green-50/50 border border-green-100/50 p-3 text-center">
-                  <p className="text-sm font-bold text-green-600">
-                    Tabriklaymiz, jarimalar yo'q! 🎉
-                  </p>
-                </div>
-              )}
+                ))}
+                {salaryInfo.fines.length === 0 && (
+                  <div
+                    style={{
+                      background: "rgba(34,197,94,0.06)",
+                      border: "1px solid rgba(34,197,94,0.15)",
+                      borderRadius: 14,
+                      padding: "14px",
+                      textAlign: "center",
+                    }}
+                  >
+                    <p
+                      style={{
+                        color: "#4ade80",
+                        fontWeight: 700,
+                        fontSize: 13,
+                        margin: 0,
+                      }}
+                    >
+                      Tabriklaymiz, jarimalar yo'q! 🎉
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div className="rounded-2xl bg-blue-50/80 border border-blue-100 p-4 mt-2">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-bold text-slate-600">Jami daromad</span>
-                <span className="text-sm font-black text-green-600">
-                  +{formatCurrency(
+            {/* Total summary */}
+            <div
+              style={{
+                background: "rgba(34,197,94,0.06)",
+                border: "1px solid rgba(34,197,94,0.15)",
+                borderRadius: 18,
+                padding: "16px",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: 8,
+                }}
+              >
+                <span style={TEXT_SECONDARY}>Jami daromad</span>
+                <span
+                  style={{ color: "#4ade80", fontWeight: 800, fontSize: 13 }}
+                >
+                  +
+                  {formatCurrency(
                     salaryInfo.baseSalary +
                       salaryInfo.kpiBonus +
                       salaryInfo.salesBonus +
-                      salaryInfo.collectionBonus
+                      salaryInfo.collectionBonus,
                   )}
                 </span>
               </div>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-bold text-slate-600">Jami jarimalar</span>
-                <span className="text-sm font-black text-red-600">
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: 12,
+                }}
+              >
+                <span style={TEXT_SECONDARY}>Jami jarimalar</span>
+                <span
+                  style={{ color: "#f87171", fontWeight: 800, fontSize: 13 }}
+                >
                   -{formatCurrency(totalFines)}
                 </span>
               </div>
-              <Separator className="bg-blue-200/50 mb-3" />
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-base text-slate-900">Sof maosh</span>
-                <span className="font-black text-xl text-blue-600">
+              <div
+                style={{
+                  height: 1,
+                  background: "rgba(34,197,94,0.15)",
+                  marginBottom: 12,
+                }}
+              />
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <span
+                  style={{
+                    color: "rgba(255,255,255,0.85)",
+                    fontWeight: 700,
+                    fontSize: 14,
+                  }}
+                >
+                  Sof maosh
+                </span>
+                <span
+                  style={{ color: "#60a5fa", fontWeight: 900, fontSize: 20 }}
+                >
                   {formatCurrency(netSalary)}
                 </span>
               </div>
@@ -513,5 +1515,5 @@ function SalaryDetailModal({
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
