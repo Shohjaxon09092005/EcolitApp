@@ -167,7 +167,7 @@ export function InvoiceSheet({ order, onClose }: InvoiceSheetProps) {
           {/* Invoice Header with Light Green Gradient */}
           <div
             style={{
-              background: "linear-gradient(135deg, #f0fdf4, #dcfce7)",
+              background: "transparent",
               borderRadius: 24,
               padding: "20px",
               border: "2px solid #10b981",

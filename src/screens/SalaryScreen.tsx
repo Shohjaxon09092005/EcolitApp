@@ -53,7 +53,7 @@ export function SalaryScreen() {
   return (
     <div
       style={{
-        background: "linear-gradient(145deg, #f0fdf4 0%, #ecfdf5 100%)",
+        background: "transparent",
         minHeight: "100vh",
         padding: "16px 12px 112px",
         maxWidth: 480,

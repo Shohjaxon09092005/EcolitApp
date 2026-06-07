@@ -37,7 +37,7 @@ export default function App() {
         margin: "0 auto",
         position: "relative",
         // === YANGILANGAN PREMIUM TO'Q FON (Tepa va pasti qora-yashil) ===
-        background: "linear-gradient(145deg, #f8fafc 0%, #eef2ff 100%)",
+        background: "linear-gradient(145deg, #f0fdf4 0%, #ecfdf5 100%)",
         overflow: "hidden",
       }}
     >
