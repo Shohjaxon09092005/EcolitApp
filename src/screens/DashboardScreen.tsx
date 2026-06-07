@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   TrendingUp,
   Wallet,
@@ -10,11 +9,8 @@ import {
   Award,
   DollarSign,
   Users,
-  // PackageX,
   BarChart3,
-  X,
 } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   BarChart,
   Bar,
@@ -26,81 +22,68 @@ import {
   AreaChart,
   Area,
 } from "recharts";
-import {
-  useStore,
-  formatCurrency,
-  useDashboardStore,
-  type SalaryInfo,
-} from "@/lib/store";
+import { useStore, formatCurrency, useDashboardStore, } from "@/lib/store";
 
 const MONTHS = ["Yan", "Fev", "Mar", "Apr", "May", "Iyn"];
 
-// ── Design Tokens ───────────────────────────────────────────
+// ---------- Enhanced Light Theme with Emerald Borders & 3D ----------
 const CARD = {
-  background: "rgba(255,255,255,0.04)",
+  background: "rgba(255, 255, 255, 0.92)",
   backdropFilter: "blur(20px)",
   WebkitBackdropFilter: "blur(20px)",
-  border: "1px solid rgba(34,197,94,0.12)",
-  borderRadius: 24,
+  border: "2px solid #10b981", // emerald border
+  borderRadius: 28,
   boxShadow:
-    "0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05)",
+    "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.02), inset 0 1px 0 rgba(255,255,255,0.9)",
+  transition: "transform 0.2s ease, box-shadow 0.2s ease",
 } as const;
 
-const CARD_GLOW = {
-  ...CARD,
-  boxShadow:
-    "0 4px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(34,197,94,0.15), inset 0 1px 0 rgba(34,197,94,0.08)",
-} as const;
+const CARD_3D_HOVER = {
+  transform: "translateY(-4px) scale(1.01)",
+  boxShadow: "0 20px 35px -10px rgba(16, 185, 129, 0.3), 0 0 0 2px #10b981",
+};
 
 const LABEL_SM = {
   fontSize: 11,
   fontWeight: 600,
   letterSpacing: "0.08em",
   textTransform: "uppercase" as const,
-  color: "rgba(74,222,128,0.6)",
+  color: "#10b981",
 };
 
 const TEXT_SECONDARY = {
-  color: "rgba(255,255,255,0.45)",
+  color: "rgba(30, 41, 59, 0.7)",
   fontSize: 12,
   fontWeight: 500,
-};
-const TEXT_PRIMARY = { color: "rgba(255,255,255,0.9)", fontWeight: 700 };
-// ────────────────────────────────────────────────────────────
+} as const;
 
+const TEXT_PRIMARY = {
+  color: "#0f172a",
+  fontWeight: 800,
+} as const;
+
+// --------------------------------------------------------------
 export function DashboardScreen() {
   const { salesPeriod, setSalesPeriod, weeklySalesData, monthlySalesData } =
     useDashboardStore();
-    
-
   const activeData =
     salesPeriod === "hafta" ? weeklySalesData : monthlySalesData;
-
-  // YAxis raqamlarini "40M", "80M" ko'rinishiga keltirish uchun formatlovchi
   const formatYAxis = (value: number) => {
     if (value === 0) return "0";
     return `${value / 1000000}M`;
   };
+
   const {
     monthlyTarget,
     monthlyAchieved,
     monthlyRevenue,
     orders,
-    // products,
     salaryInfo,
     partners,
     setActiveTab,
   } = useStore();
-  // Qarzdor mijozlar statistikasi
+
   const debtors = partners.filter((p) => p.debtAmount > 0);
-  // const debtorCount = debtors.length;
-  // const totalDebtFromPartners = debtors.reduce(
-  //   (sum, p) => sum + p.debtAmount,
-  //   0,
-  // );
-  // const topDebtor = debtors.sort((a, b) => b.debtAmount - a.debtAmount)[0];
-  // const avgDebt = debtorCount ? totalDebtFromPartners / debtorCount : 0;
-  const [salaryOpen, setSalaryOpen] = useState(false);
 
   const progressPct = Math.min(
     100,
@@ -118,7 +101,6 @@ export function DashboardScreen() {
   const pendingPayments = orders
     .filter((o) => o.status === "qarz_kutilmoqda")
     .reduce((s, o) => s + o.debtAmount, 0);
-  // const lowStockProducts = products.filter((p) => p.stock <= p.minStock);
   const totalFines = salaryInfo.fines.reduce((s, f) => s + f.amount, 0);
   const netSalary =
     salaryInfo.baseSalary +
@@ -137,39 +119,41 @@ export function DashboardScreen() {
       label: "Bugungi sotuv",
       value: formatCurrency(todaySales),
       icon: DollarSign,
-      accent: "#4ade80",
-      bg: "rgba(34,197,94,0.1)",
-      glow: "rgba(34,197,94,0.2)",
+      accent: "#10b981",
+      bg: "rgba(16, 185, 129, 0.08)",
+      glow: "rgba(16, 185, 129, 0.2)",
     },
     {
       label: "Oylik buyurtmalar",
       value: `${monthOrders} ta`,
       icon: ShoppingCart,
-      accent: "#60a5fa",
-      bg: "rgba(59,130,246,0.1)",
-      glow: "rgba(59,130,246,0.2)",
+      accent: "#3b82f6",
+      bg: "rgba(59, 130, 246, 0.08)",
+      glow: "rgba(59, 130, 246, 0.2)",
     },
     {
       label: "Kutilayotganlar",
       value: formatCurrency(pendingPayments),
       icon: Clock,
-      accent: "#fb923c",
-      bg: "rgba(249,115,22,0.1)",
-      glow: "rgba(249,115,22,0.2)",
+      accent: "#f97316",
+      bg: "rgba(249, 115, 22, 0.08)",
+      glow: "rgba(249, 115, 22, 0.2)",
     },
     {
       label: "Debitorlik",
       value: formatCurrency(totalDebt),
       icon: CreditCard,
-      accent: "#f87171",
-      bg: "rgba(239,68,68,0.1)",
-      glow: "rgba(239,68,68,0.2)",
+      accent: "#ef4444",
+      bg: "rgba(239, 68, 68, 0.08)",
+      glow: "rgba(239, 68, 68, 0.2)",
     },
   ];
 
   return (
     <div
       style={{
+        background: "linear-gradient(145deg, #f0fdf4 0%, #ecfdf5 100%)",
+        minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
         gap: 16,
@@ -179,7 +163,7 @@ export function DashboardScreen() {
         margin: "0 auto",
       }}
     >
-      {/* ── Header ── */}
+      {/* Header */}
       <div
         style={{
           display: "flex",
@@ -194,22 +178,15 @@ export function DashboardScreen() {
               width: 48,
               height: 48,
               borderRadius: "50%",
-              background: "linear-gradient(145deg, #16a34a, #15803d)",
-              border: "2px solid rgba(74,222,128,0.35)",
-              boxShadow: "0 0 16px rgba(34,197,94,0.3)",
+              background: "linear-gradient(145deg, #10b981, #059669)",
+              border: "2px solid #10b981",
+              boxShadow: "0 4px 12px rgba(16, 185, 129, 0.3)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <span
-              style={{
-                color: "#fff",
-                fontWeight: 800,
-                fontSize: 16,
-                letterSpacing: 1,
-              }}
-            >
+            <span style={{ color: "#fff", fontWeight: 800, fontSize: 16 }}>
               SM
             </span>
           </div>
@@ -217,7 +194,7 @@ export function DashboardScreen() {
             <p style={{ ...TEXT_SECONDARY, marginBottom: 2 }}>Xayrli kun,</p>
             <h1
               style={{
-                color: "rgba(255,255,255,0.92)",
+                color: "#0f172a",
                 fontWeight: 800,
                 fontSize: 18,
                 lineHeight: 1,
@@ -225,28 +202,22 @@ export function DashboardScreen() {
               }}
             >
               Sarvar{" "}
-              <span
-                style={{
-                  color: "rgba(74,222,128,0.7)",
-                  fontWeight: 500,
-                  fontSize: 13,
-                }}
-              >
+              <span style={{ color: "#10b981", fontWeight: 500, fontSize: 13 }}>
                 (Menejer)
               </span>
             </h1>
           </div>
         </div>
-        {/* Live dot */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             gap: 6,
-            background: "rgba(34,197,94,0.08)",
-            border: "1px solid rgba(34,197,94,0.2)",
+            background: "rgba(16, 185, 129, 0.1)",
+            border: "1px solid #10b981",
             borderRadius: 20,
             padding: "5px 12px",
+            boxShadow: "0 2px 6px rgba(16,185,129,0.2)",
           }}
         >
           <span
@@ -254,39 +225,29 @@ export function DashboardScreen() {
               width: 6,
               height: 6,
               borderRadius: "50%",
-              background: "#4ade80",
-              boxShadow: "0 0 6px #4ade80",
-              display: "inline-block",
+              background: "#10b981",
+              boxShadow: "0 0 6px #10b981",
             }}
           />
-          <span
-            style={{
-              color: "#4ade80",
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: "0.05em",
-            }}
-          >
+          <span style={{ color: "#10b981", fontSize: 11, fontWeight: 700 }}>
             JONLI
           </span>
         </div>
       </div>
-      {/* ── KPI HERO SALES CARD (RASMDAGI KOMBINATSIYA) ── */}
+
+      {/* KPI Hero Card with Emerald Border */}
       <div
         style={{
-          // image_8c41b8.png rasmining o'ng tomonidagi juda to'q, sirli yashil fon
-          background: "linear-gradient(135deg, #036b2b 0%, #040806 100%)",
-          // Rasmdagi yorqin yashil rangdan ingichka premium chegara
-          border: "1px solid rgba(34, 197, 94, 0.2)",
-          borderRadius: 24,
+          background: "linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)",
+          border: "2px solid #10b981",
+          borderRadius: 28,
           padding: "26px 24px 22px",
           boxShadow:
-            "0 25px 50px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.05)",
+            "0 12px 28px -8px rgba(16, 185, 129, 0.2), inset 0 1px 0 rgba(255,255,255,0.8)",
           position: "relative",
           overflow: "hidden",
         }}
       >
-        {/* Burchakdagi yorug'lik effekti (To'q fonda chiroyli neon bo'lib taraladi) */}
         <div
           style={{
             position: "absolute",
@@ -296,17 +257,13 @@ export function DashboardScreen() {
             height: 150,
             borderRadius: "50%",
             background:
-              "radial-gradient(circle, rgba(34, 197, 94, 0.12) 0%, transparent 75%)",
-            filter: "blur(25px)",
-            pointerEvents: "none",
+              "radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 75%)",
+            filter: "blur(30px)",
           }}
         />
-
-        {/* Top row */}
         <div
           style={{
             display: "flex",
-            alignItems: "flex-start",
             justifyContent: "space-between",
             marginBottom: 24,
             position: "relative",
@@ -317,193 +274,159 @@ export function DashboardScreen() {
             <p
               style={{
                 ...LABEL_SM,
-                marginBottom: 8,
                 fontSize: 13,
-                color: "rgba(255, 255, 255, 0.4)",
-                letterSpacing: "0.5px",
+                color: "#10b981",
+                marginBottom: 8,
               }}
             >
               {salaryInfo?.month || "Ushbu oy"} savdo rejasi
             </p>
             <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-              {/* Yorqin toza oq rangdagi ulkan raqam */}
-              <span
-                style={{
-                  fontSize: 56,
-                  fontWeight: 950,
-                  color: "#ffffff",
-                  lineHeight: 1,
-                  letterSpacing: "-2px",
-                }}
-              >
+              <span style={{ fontSize: 56, fontWeight: 950, color: "#0f172a" }}>
                 {progressPct}
               </span>
-              {/* Rasmdagi yorqin yashil foiz belgisi */}
-              <span style={{ fontSize: 26, fontWeight: 800, color: "#22c55e" }}>
+              <span style={{ fontSize: 26, fontWeight: 800, color: "#10b981" }}>
                 %
               </span>
             </div>
           </div>
-
-          {/* Status belgisi: To'q fon ustida rasmdagi yorqin yashil kombinatsiya */}
           <div
             style={{
               display: "flex",
               alignItems: "center",
               gap: 6,
-              background: "rgba(34, 197, 94, 0.1)",
-              border: "1px solid rgba(34, 197, 94, 0.3)",
+              background: "rgba(16,185,129,0.1)",
+              border: "1px solid #10b981",
               borderRadius: 14,
               padding: "8px 14px",
             }}
           >
-            <TrendingUp style={{ width: 16, height: 16, color: "#22c55e" }} />
-            <span
-              style={{
-                color: "#22c55e",
-                fontSize: 13,
-                fontWeight: 800,
-                letterSpacing: "0.3px",
-              }}
-            >
-              O'smoqda
-            </span>
+            <TrendingUp size={16} color="#10b981" />
+            <span style={{ color: "#10b981", fontWeight: 800 }}>O'smoqda</span>
           </div>
         </div>
-
-        {/* Progress bar */}
-        <div style={{ position: "relative", marginBottom: 22, zIndex: 1 }}>
+        <div style={{ marginBottom: 22 }}>
           <div
             style={{
               height: 10,
               borderRadius: 9999,
-              background: "rgba(255, 255, 255, 0.03)", // Chuqur shaffof orqa foni
+              background: "rgba(0,0,0,0.05)",
               overflow: "hidden",
-              border: "1px solid rgba(255, 255, 255, 0.02)",
+              border: "1px solid rgba(16,185,129,0.2)",
             }}
           >
-            {/* To'ldirish chizig'i: Aynan rasm dagi dumaloq tugmaning yorqin yashil rangi */}
             <div
               style={{
                 width: `${progressPct}%`,
                 height: "100%",
-                background: "linear-gradient(90deg, #16a34a, #22c55e)",
+                background: "linear-gradient(90deg, #10b981, #34d399)",
                 borderRadius: 9999,
-                boxShadow: "0 0 14px rgba(34, 197, 94, 0.5)",
-                transition: "width 1s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                boxShadow: "0 0 8px #10b981",
+                transition: "width 1s cubic-bezier(0.34,1.56,0.64,1)",
               }}
             />
           </div>
         </div>
-
-        {/* Bottom row */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            position: "relative",
-            zIndex: 1,
-          }}
-        >
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
           <div>
-            <p
-              style={{
-                ...TEXT_SECONDARY,
-                marginBottom: 6,
-                fontSize: 12,
-                color: "rgba(255, 255, 255, 0.35)",
-              }}
-            >
+            <p style={{ ...TEXT_SECONDARY, marginBottom: 6 }}>
               Bajarilgan savdo
             </p>
-            {/* Rasmdagi yorqin yashil rang summani yaqqol ko'rsatib turadi */}
-            <p
-              style={{
-                color: "#22c55e",
-                fontWeight: 850,
-                fontSize: 18,
-                margin: 0,
-              }}
-            >
+            <p style={{ color: "#10b981", fontWeight: 850, fontSize: 18 }}>
               {formatCurrency(monthlyAchieved)}
             </p>
           </div>
           <div style={{ textAlign: "right" }}>
-            <p
-              style={{
-                ...TEXT_SECONDARY,
-                marginBottom: 6,
-                fontSize: 12,
-                color: "rgba(255, 255, 255, 0.35)",
-              }}
-            >
-              Savdo maqsadi
-            </p>
-            {/* Maqsad oq rangda, lekin fonga singib ketmaydi */}
-            <p
-              style={{
-                color: "#ffffff",
-                fontWeight: 850,
-                fontSize: 18,
-                margin: 0,
-              }}
-            >
+            <p style={{ ...TEXT_SECONDARY, marginBottom: 6 }}>Savdo maqsadi</p>
+            <p style={{ color: "#0f172a", fontWeight: 850, fontSize: 18 }}>
               {formatCurrency(monthlyTarget)}
             </p>
           </div>
         </div>
       </div>
-      {/* ── Stats Grid 2x2 ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+
+      {/* STATS GRID (2x2) - enhanced with 3D, background icons, larger text */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         {statCards.map((card) => (
           <div
             key={card.label}
             style={{
               ...CARD,
-              padding: "18px 16px",
+              padding: "20px 16px",
               position: "relative",
               overflow: "hidden",
+              cursor: "pointer",
+            }}
+            onMouseEnter={(e) => {
+              Object.assign(e.currentTarget.style, CARD_3D_HOVER);
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "";
+              e.currentTarget.style.boxShadow = CARD.boxShadow;
             }}
           >
-            {/* bg glow blob */}
+            {/* Background icon (semi-transparent, huge) */}
             <div
               style={{
                 position: "absolute",
-                top: -10,
+                bottom: -10,
                 right: -10,
-                width: 70,
-                height: 70,
-                borderRadius: "50%",
-                background: card.glow,
-                filter: "blur(20px)",
-                pointerEvents: "none",
+                opacity: 0.12,
+                transform: "rotate(-5deg)",
               }}
-            />
+            >
+              <card.icon size={90} color={card.accent} strokeWidth={1.2} />
+            </div>
+
             <div
               style={{
-                width: 38,
-                height: 38,
-                borderRadius: 12,
+                width: 44,
+                height: 44,
+                borderRadius: 16,
                 background: card.bg,
-                border: `1px solid ${card.accent}30`,
+                border: `1px solid ${card.accent}40`,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                marginBottom: 12,
+                marginBottom: 14,
+                position: "relative",
+                zIndex: 2,
               }}
             >
-              <card.icon
-                style={{ width: 18, height: 18, color: card.accent }}
-              />
+              <card.icon size={22} color={card.accent} />
             </div>
-            <p style={{ ...TEXT_SECONDARY, marginBottom: 4 }}>{card.label}</p>
-            <p style={{ ...TEXT_PRIMARY, fontSize: 14, margin: 0 }}>
+            <p
+              style={{
+                ...TEXT_SECONDARY,
+                marginBottom: 6,
+                fontSize: 13,
+                fontWeight: 600,
+                letterSpacing: "0.03em",
+                position: "relative",
+                zIndex: 2,
+              }}
+            >
+              {card.label}
+            </p>
+            <p
+              style={{
+                ...TEXT_PRIMARY,
+                fontSize: 20,
+                fontWeight: 900,
+                letterSpacing: "-0.3px",
+                margin: 0,
+                position: "relative",
+                zIndex: 2,
+                color: "#0f172a",
+              }}
+            >
               {card.value}
             </p>
           </div>
         ))}
       </div>
-      {/* ── Bar Chart ── */}
+
+      {/* Bar Chart (6 months) */}
       <div style={{ ...CARD, padding: "18px 6px 16px" }}>
         <div
           style={{
@@ -514,14 +437,8 @@ export function DashboardScreen() {
             paddingLeft: 14,
           }}
         >
-          <BarChart3 style={{ width: 16, height: 16, color: "#4ade80" }} />
-          <span
-            style={{
-              color: "rgba(255,255,255,0.8)",
-              fontWeight: 700,
-              fontSize: 14,
-            }}
-          >
+          <BarChart3 size={16} color="#10b981" />
+          <span style={{ color: "#0f172a", fontWeight: 700, fontSize: 14 }}>
             So'nggi 6 oy tushumi (mln so'm)
           </span>
         </div>
@@ -532,59 +449,51 @@ export function DashboardScreen() {
           >
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="rgba(255,255,255,0.05)"
+              stroke="rgba(0,0,0,0.05)"
               vertical={false}
             />
             <XAxis
               dataKey="month"
-              tick={{
-                fontSize: 11,
-                fill: "rgba(255,255,255,0.4)",
-                fontWeight: 600,
-              }}
+              tick={{ fontSize: 11, fill: "#475569" }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
-              tick={{
-                fontSize: 11,
-                fill: "rgba(255,255,255,0.4)",
-                fontWeight: 600,
-              }}
+              tick={{ fontSize: 11, fill: "#475569" }}
               axisLine={false}
               tickLine={false}
             />
             <Tooltip
               formatter={(value) => [`${value} mln`, "Tushum"]}
               contentStyle={{
-                background: "rgba(4,20,10,0.95)",
-                backdropFilter: "blur(12px)",
-                border: "1px solid rgba(34,197,94,0.25)",
+                background: "#ffffffcc",
+                backdropFilter: "blur(8px)",
+                border: "1px solid #10b981",
                 borderRadius: 14,
                 fontSize: 12,
                 fontWeight: 700,
-                color: "#4ade80",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+                color: "#0f172a",
+                boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
               }}
-              cursor={{ fill: "rgba(34,197,94,0.05)" }}
+              cursor={{ fill: "rgba(16,185,129,0.08)" }}
             />
             <Bar
               dataKey="summa"
-              fill="url(#barGrad)"
+              fill="url(#barGradLight)"
               radius={[6, 6, 0, 0]}
-              barSize={26}
+              barSize={28}
             />
             <defs>
-              <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#4ade80" stopOpacity={0.9} />
-                <stop offset="100%" stopColor="#16a34a" stopOpacity={0.6} />
+              <linearGradient id="barGradLight" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#10b981" stopOpacity={0.8} />
+                <stop offset="100%" stopColor="#34d399" stopOpacity={0.4} />
               </linearGradient>
             </defs>
           </BarChart>
         </ResponsiveContainer>
       </div>
-      {/* ── Salary Widget ── */}
-      <div style={{ ...CARD_GLOW, padding: "18px 20px" }}>
+      {/* Salary Widget */}
+      <div style={{ ...CARD_3D_HOVER, ...CARD, padding: "18px 20px" }}>
         <div
           style={{
             display: "flex",
@@ -594,63 +503,38 @@ export function DashboardScreen() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Wallet style={{ width: 16, height: 16, color: "#4ade80" }} />
-            <span
-              style={{
-                color: "rgba(255,255,255,0.85)",
-                fontWeight: 700,
-                fontSize: 14,
-              }}
-            >
+            <Wallet size={16} color="#10b981" />
+            <span style={{ color: "#0f172a", fontWeight: 700, fontSize: 14 }}>
               Maosh hisob-kitobi
             </span>
           </div>
           <button
-            onClick={() => setSalaryOpen(true)}
+            onClick={() => setActiveTab("salary")}
             style={{
+              background: "rgba(16,185,129,0.1)",
+              border: "1px solid #10b981",
+              borderRadius: 30,
+              padding: "6px 14px",
+              fontSize: 11,
+              fontWeight: 700,
+              color: "#10b981",
+              cursor: "pointer",
               display: "flex",
               alignItems: "center",
               gap: 4,
-              background: "rgba(34,197,94,0.1)",
-              border: "1px solid rgba(34,197,94,0.2)",
-              borderRadius: 10,
-              padding: "5px 10px",
-              cursor: "pointer",
-              color: "#4ade80",
-              fontSize: 11,
-              fontWeight: 700,
             }}
           >
-            Ko'rish <ChevronRight style={{ width: 12, height: 12 }} />
+            Ko'rish <ChevronRight size={12} />
           </button>
         </div>
-
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
             <span style={TEXT_SECONDARY}>Asosiy maosh</span>
-            <span
-              style={{
-                color: "rgba(255,255,255,0.8)",
-                fontWeight: 700,
-                fontSize: 13,
-              }}
-            >
+            <span style={{ color: "#0f172a", fontWeight: 700 }}>
               {formatCurrency(salaryInfo.baseSalary)}
             </span>
           </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
             <span
               style={{
                 ...TEXT_SECONDARY,
@@ -659,100 +543,67 @@ export function DashboardScreen() {
                 gap: 5,
               }}
             >
-              <Award style={{ width: 13, height: 13, color: "#4ade80" }} /> KPI
-              bonus
+              <Award size={13} color="#10b981" /> KPI bonus
             </span>
-            <span style={{ color: "#4ade80", fontWeight: 700, fontSize: 13 }}>
+            <span style={{ color: "#10b981", fontWeight: 700 }}>
               +{formatCurrency(salaryInfo.kpiBonus)}
             </span>
           </div>
-          <div
-            style={{
-              height: 1,
-              background: "rgba(255,255,255,0.06)",
-              margin: "2px 0",
-            }}
-          />
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <span
-              style={{
-                color: "rgba(255,255,255,0.7)",
-                fontWeight: 700,
-                fontSize: 13,
-              }}
-            >
+          <div style={{ height: 1, background: "rgba(0,0,0,0.06)" }} />
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <span style={{ fontWeight: 700, color: "#0f172a" }}>
               Jami (taxminiy)
             </span>
-            <span style={{ color: "#60a5fa", fontWeight: 900, fontSize: 17 }}>
+            <span style={{ color: "#3b82f6", fontWeight: 900, fontSize: 17 }}>
               {formatCurrency(netSalary)}
             </span>
           </div>
         </div>
       </div>
-      {/*savdo tahlili */}
+
+      {/* Sales Dynamics Area Chart */}
       <div
         style={{
-          backgroundColor: "rgba(18, 74, 39, 0.2)", // Stats cardingiz foni (yoki loyihadagi ...CARD obyekti)
-          borderRadius: 24,
+          background: "rgba(255,255,255,0.85)",
+          backdropFilter: "blur(20px)",
+          borderRadius: 28,
           padding: "24px",
-          boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.15)",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.05), 0 0 0 2px #10b981",
           marginBottom: "24px",
-          fontFamily: "sans-serif",
-          color: "#ffffff",
-          // ── Stats carddan ko'chirilgan muhim stillar ──
           position: "relative",
           overflow: "hidden",
         }}
       >
-        {/* 🌌 bg glow blob (Stats cardingizdagi effekt, grafik rangiga mos yashil neon holatda) */}
         <div
           style={{
             position: "absolute",
             top: -20,
             right: -20,
-            width: 130, // Katta card bo'lgani uchun blob o'lchami biroz kattalashtirildi
+            width: 130,
             height: 130,
             borderRadius: "50%",
-            background: "rgba(22, 163, 74, 0.3)", // Yashil neon glow effekti
+            background:
+              "radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 75%)",
             filter: "blur(30px)",
             pointerEvents: "none",
-            zIndex: 1, // Grafik ustiga chiqib ketmasligi uchun
           }}
         />
-
-        {/* Kontentlarni glow'dan ustunroq ko'rsatish uchun wrapper */}
         <div style={{ position: "relative", zIndex: 2 }}>
-          {/* Header: Sarlavha va Hafta/Oy Knopkalari */}
           <div
             style={{
               display: "flex",
+              justifyContent: "space-between",
               alignItems: "center",
               marginBottom: 24,
-              justifyContent: "space-between",
             }}
           >
-            <h3
-              style={{
-                margin: 0,
-                fontSize: 16,
-                fontWeight: 700,
-                color: "#ffffff", // 🌟 Yorqin oq matn
-              }}
-            >
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: "#0f172a" }}>
               Sotuv Dinamikasi
             </h3>
-
-            {/* Hafta / Oy Switcher (Pill dizayn) */}
             <div
               style={{
                 display: "flex",
-                background: "#0f172a", // Ichki qorong'u fon
+                background: "#e2e8f0",
                 padding: 4,
                 borderRadius: 100,
               }}
@@ -767,15 +618,12 @@ export function DashboardScreen() {
                   fontWeight: 600,
                   cursor: "pointer",
                   backgroundColor:
-                    salesPeriod === "hafta"
-                      ? "rgba(34,197,94,0.2)"
-                      : "transparent",
-                  color: "#ffffff", // 🌟 Yorqin oq matn
+                    salesPeriod === "hafta" ? "#ffffff" : "transparent",
+                  color: salesPeriod === "hafta" ? "#10b981" : "#475569",
                   boxShadow:
                     salesPeriod === "hafta"
-                      ? "0px 2px 8px rgba(0,0,0,0.2)"
+                      ? "0 2px 8px rgba(0,0,0,0.1)"
                       : "none",
-                  transition: "all 0.2s",
                 }}
               >
                 Hafta
@@ -790,21 +638,16 @@ export function DashboardScreen() {
                   fontWeight: 600,
                   cursor: "pointer",
                   backgroundColor:
-                    salesPeriod === "oy" ? "#334155" : "transparent",
-                  color: "#ffffff", // 🌟 Yorqin oq matn
+                    salesPeriod === "oy" ? "#ffffff" : "transparent",
+                  color: salesPeriod === "oy" ? "#10b981" : "#475569",
                   boxShadow:
-                    salesPeriod === "oy"
-                      ? "0px 2px 8px rgba(0,0,0,0.2)"
-                      : "none",
-                  transition: "all 0.2s",
+                    salesPeriod === "oy" ? "0 2px 8px rgba(0,0,0,0.1)" : "none",
                 }}
               >
                 Oy
               </button>
             </div>
           </div>
-
-          {/* Grafik Qismi */}
           <div style={{ width: "100%", height: 220 }}>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
@@ -812,116 +655,106 @@ export function DashboardScreen() {
                 margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
               >
                 <defs>
-                  <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0.0} />
+                  <linearGradient
+                    id="colorSalesLight"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
-
-                {/* Setka chiziqlari */}
                 <CartesianGrid
                   strokeDasharray="3 3"
                   vertical={false}
-                  stroke="#334155"
+                  stroke="#cbd5e1"
                 />
-
                 <XAxis
                   dataKey="name"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: "#94a3b8", fontSize: 12, fontWeight: 500 }}
+                  tick={{ fill: "#475569", fontSize: 12 }}
                   dy={10}
                 />
-
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: "#94a3b8", fontSize: 12, fontWeight: 500 }}
+                  tick={{ fill: "#475569", fontSize: 12 }}
                   tickFormatter={formatYAxis}
                   domain={[0, 160000000]}
                   ticks={[0, 40000000, 80000000, 120000000, 160000000]}
                 />
-
-                {/* To'q fonli zamonaviy Tooltip */}
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#0f172a",
+                    backgroundColor: "#ffffff",
                     borderRadius: 12,
-                    border: "1px solid #334155",
+                    border: "1px solid #10b981",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                   }}
-                  labelStyle={{ color: "#94a3b8", fontWeight: "bold" }}
-                  itemStyle={{ color: "#22c55e" }}
+                  labelStyle={{ color: "#0f172a", fontWeight: "bold" }}
+                  itemStyle={{ color: "#10b981" }}
                   formatter={(value: any) => [
                     `${Number(value).toLocaleString()} UZS`,
                     "Sotuv",
                   ]}
                 />
-
-                {/* Silliq chiziqli yashil Area */}
                 <Area
                   type="monotone"
                   dataKey="amount"
-                  stroke="#22c55e"
+                  stroke="#10b981"
                   strokeWidth={2.5}
                   fillOpacity={1}
-                  fill="url(#colorSales)"
+                  fill="url(#colorSalesLight)"
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
       </div>
-      {/* // ================== QARZDORLAR RO'YXATI KARTOCHKASI ==================
-      // (Joylashtirish: masalan, Maosh widgeti va Savdo dinamikasi orasiga) */}
+
+      {/* Top Debtors Widget */}
       <div style={{ ...CARD, padding: "18px 20px" }}>
         <div
           style={{
             display: "flex",
-            alignItems: "center",
             justifyContent: "space-between",
+            alignItems: "center",
             marginBottom: 16,
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <AlertTriangle
-              style={{ width: 16, height: 16, color: "#fb923c" }}
-            />
-            <span
-              style={{
-                color: "rgba(255,255,255,0.85)",
-                fontWeight: 700,
-                fontSize: 14,
-              }}
-            >
+            <AlertTriangle size={16} color="#f97316" />
+            <span style={{ color: "#0f172a", fontWeight: 700 }}>
               Eng katta qarzdorlar
             </span>
           </div>
           <button
-            onClick={() => setActiveTab("customers")} // customers tabiga o'tish
+            onClick={() => setActiveTab("customers")}
             style={{
-              background: "rgba(34,197,94,0.1)",
-              border: "1px solid rgba(34,197,94,0.3)",
-              borderRadius: 20,
+              background: "rgba(16,185,129,0.1)",
+              border: "1px solid #10b981",
+              borderRadius: 30,
               padding: "6px 14px",
               fontSize: 11,
               fontWeight: 700,
-              color: "#4ade80",
-              cursor: "pointer",
+              color: "#10b981",
               display: "flex",
               alignItems: "center",
               gap: 6,
+              cursor: "pointer",
             }}
           >
             Umumiy ko‘rish <ChevronRight size={14} />
           </button>
         </div>
-
         {debtors.length === 0 ? (
           <div
             style={{
               textAlign: "center",
               padding: "24px 0",
-              color: "#a3e635",
+              color: "#10b981",
               fontWeight: 500,
             }}
           >
@@ -933,13 +766,13 @@ export function DashboardScreen() {
               <div
                 key={debtor.id}
                 style={{
-                  background: "rgba(34,197,94,0.05)",
-                  borderRadius: 16,
+                  background: "rgba(16,185,129,0.05)",
+                  borderRadius: 18,
                   padding: "12px 14px",
                   display: "flex",
-                  alignItems: "center",
                   justifyContent: "space-between",
-                  border: "1px solid rgba(34,197,94,0.1)",
+                  alignItems: "center",
+                  border: "1px solid rgba(16,185,129,0.2)",
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -957,47 +790,51 @@ export function DashboardScreen() {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontSize: 12,
                       fontWeight: 800,
+                      fontSize: 12,
                       color: "#0a0f1a",
                     }}
                   >
                     {idx + 1}
                   </div>
                   <div>
-                    <div style={{ fontWeight: 700, color: "#ffffff" }}>
+                    <div style={{ fontWeight: 700, color: "#0f172a" }}>
                       {debtor.name}
                     </div>
-                    <div
-                      style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}
-                    >
+                    <div style={{ fontSize: 11, color: "#475569" }}>
                       {debtor.phone}
                     </div>
                   </div>
                 </div>
                 <div style={{ textAlign: "right" }}>
                   <div
-                    style={{ fontSize: 14, fontWeight: 800, color: "#f87171" }}
+                    style={{ fontSize: 14, fontWeight: 800, color: "#ef4444" }}
                   >
                     {formatCurrency(debtor.debtAmount)}
                   </div>
-                  <div style={{ fontSize: 10, color: "#fb923c" }}>
+                  <div style={{ fontSize: 10, color: "#f97316" }}>
                     Limit: {formatCurrency(debtor.debtLimit)}
                   </div>
                 </div>
               </div>
             ))}
             {debtors.length > 3 && (
-              <div style={{ textAlign: "center", marginTop: 4 }}>
-                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>
-                  + {debtors.length - 3} ta yana qarzdor
-                </span>
+              <div
+                style={{
+                  textAlign: "center",
+                  fontSize: 11,
+                  color: "#64748b",
+                  marginTop: 4,
+                }}
+              >
+                + {debtors.length - 3} ta yana qarzdor
               </div>
             )}
           </div>
         )}
       </div>
-      {/* ── Recent Orders ── */}
+
+      {/* Recent Orders */}
       <div style={{ ...CARD, padding: "18px 18px 12px" }}>
         <div
           style={{
@@ -1007,14 +844,8 @@ export function DashboardScreen() {
             marginBottom: 14,
           }}
         >
-          <Users style={{ width: 15, height: 15, color: "#60a5fa" }} />
-          <span
-            style={{
-              color: "rgba(255,255,255,0.8)",
-              fontWeight: 700,
-              fontSize: 14,
-            }}
-          >
+          <Users size={15} color="#3b82f6" />
+          <span style={{ color: "#0f172a", fontWeight: 700, fontSize: 14 }}>
             So'nggi buyurtmalar
           </span>
         </div>
@@ -1027,49 +858,30 @@ export function DashboardScreen() {
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "11px 0",
-                borderBottom:
-                  i < 3 ? "1px solid rgba(255,255,255,0.05)" : "none",
+                borderBottom: i < 3 ? "1px solid rgba(0,0,0,0.05)" : "none",
               }}
             >
-              <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ flex: 1 }}>
                 <p
                   style={{
                     fontSize: 13,
                     fontWeight: 700,
-                    color: "rgba(255,255,255,0.85)",
+                    color: "#0f172a",
                     margin: 0,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
                   }}
                 >
                   {order.partnerName}
                 </p>
-                <p
-                  style={{
-                    fontSize: 10,
-                    color: "rgba(255,255,255,0.3)",
-                    marginTop: 3,
-                    margin: "3px 0 0",
-                  }}
-                >
+                <p style={{ fontSize: 10, color: "#475569", marginTop: 3 }}>
                   {order.id} · {order.createdAt}
                 </p>
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-end",
-                  gap: 5,
-                  marginLeft: 12,
-                }}
-              >
+              <div style={{ textAlign: "right", marginLeft: 12 }}>
                 <p
                   style={{
                     fontSize: 13,
                     fontWeight: 800,
-                    color: "rgba(255,255,255,0.85)",
+                    color: "#0f172a",
                     margin: 0,
                   }}
                 >
@@ -1081,20 +893,11 @@ export function DashboardScreen() {
           ))}
         </div>
       </div>
-      {/* ── Salary Modal ── */}
-      <SalaryDetailModal
-        open={salaryOpen}
-        onClose={() => setSalaryOpen(false)}
-        salaryInfo={salaryInfo}
-        netSalary={netSalary}
-        totalFines={totalFines}
-        kpiPercent={progressPct}
-      />
     </div>
   );
 }
 
-// ── Status Badge ──────────────────────────────────────────────
+// ---------- Status Badge (light theme with emerald touch) ----------
 function StatusBadge({ status }: { status: string }) {
   const map: Record<
     string,
@@ -1102,57 +905,57 @@ function StatusBadge({ status }: { status: string }) {
   > = {
     kutilmoqda: {
       label: "Kutilmoqda",
-      color: "#fb923c",
+      color: "#f97316",
       bg: "rgba(249,115,22,0.1)",
-      border: "rgba(249,115,22,0.25)",
+      border: "#f97316",
     },
     tasdiqlangan: {
       label: "Tasdiqlangan",
-      color: "#60a5fa",
+      color: "#3b82f6",
       bg: "rgba(59,130,246,0.1)",
-      border: "rgba(59,130,246,0.25)",
+      border: "#3b82f6",
     },
     yuklangan: {
       label: "Yuklangan",
-      color: "#a78bfa",
+      color: "#8b5cf6",
       bg: "rgba(139,92,246,0.1)",
-      border: "rgba(139,92,246,0.25)",
+      border: "#8b5cf6",
     },
     yetkazildi: {
       label: "Yetkazildi",
-      color: "#4ade80",
-      bg: "rgba(34,197,94,0.1)",
-      border: "rgba(34,197,94,0.25)",
+      color: "#10b981",
+      bg: "rgba(16,185,129,0.1)",
+      border: "#10b981",
     },
     rad_etildi: {
       label: "Rad etildi",
-      color: "#f87171",
+      color: "#ef4444",
       bg: "rgba(239,68,68,0.1)",
-      border: "rgba(239,68,68,0.25)",
+      border: "#ef4444",
     },
     qarz_kutilmoqda: {
       label: "Qarz",
-      color: "#fbbf24",
+      color: "#f59e0b",
       bg: "rgba(245,158,11,0.1)",
-      border: "rgba(245,158,11,0.25)",
+      border: "#f59e0b",
     },
   };
   const s = map[status] ?? {
     label: status,
-    color: "rgba(255,255,255,0.5)",
-    bg: "rgba(255,255,255,0.05)",
-    border: "rgba(255,255,255,0.1)",
+    color: "#475569",
+    bg: "rgba(0,0,0,0.05)",
+    border: "#cbd5e1",
   };
   return (
     <span
       style={{
         display: "inline-flex",
         alignItems: "center",
-        borderRadius: 8,
-        padding: "3px 7px",
+        borderRadius: 20,
+        padding: "3px 10px",
         fontSize: 9,
-        fontWeight: 800,
-        letterSpacing: "0.06em",
+        fontWeight: 700,
+        letterSpacing: "0.05em",
         textTransform: "uppercase",
         color: s.color,
         background: s.bg,
@@ -1161,359 +964,5 @@ function StatusBadge({ status }: { status: string }) {
     >
       {s.label}
     </span>
-  );
-}
-
-// ── Salary Detail Modal ───────────────────────────────────────
-function SalaryDetailModal({
-  open,
-  onClose,
-  salaryInfo,
-  netSalary,
-  totalFines,
-  kpiPercent,
-}: {
-  open: boolean;
-  onClose: () => void;
-  salaryInfo: SalaryInfo;
-  netSalary: number;
-  totalFines: number;
-  kpiPercent: number;
-}) {
-  const rows = [
-    {
-      label: "Asosiy maosh",
-      amount: salaryInfo.baseSalary,
-      note: "Belgilangan stavka",
-    },
-    {
-      label: "KPI bonusi",
-      amount: salaryInfo.kpiBonus,
-      note: `KPI bajarilishi: ${kpiPercent}%`,
-    },
-    {
-      label: "Sotuv bonusi",
-      amount: salaryInfo.salesBonus,
-      note: "Oylik sotuv hajmiga qarab",
-    },
-    {
-      label: "Inkassatsiya bonusi",
-      amount: salaryInfo.collectionBonus,
-      note: "Qarzlarni yig'ish samaradorligi",
-    },
-  ];
-
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent
-        className="sm:max-w-md w-[calc(100%-32px)] max-h-[85vh] overflow-hidden p-0 gap-0 [&>button:first-child]:hidden"
-        style={{
-          background: "rgba(3,14,7,0.97)",
-          backdropFilter: "blur(32px)",
-          border: "1px solid rgba(34,197,94,0.2)",
-          borderRadius: 28,
-          boxShadow:
-            "0 24px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(34,197,94,0.1)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            maxHeight: "85vh",
-          }}
-        >
-          {/* Header */}
-          <div
-            style={{
-              padding: "20px 20px 16px",
-              borderBottom: "1px solid rgba(255,255,255,0.06)",
-              position: "relative",
-              background: "rgba(34,197,94,0.04)",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                marginBottom: 4,
-              }}
-            >
-              <Wallet style={{ width: 18, height: 18, color: "#4ade80" }} />
-              <span
-                style={{
-                  color: "rgba(255,255,255,0.9)",
-                  fontWeight: 800,
-                  fontSize: 16,
-                }}
-              >
-                To'liq maosh hisob-kitobi
-              </span>
-            </div>
-            <p
-              style={{
-                color: "rgba(74,222,128,0.6)",
-                fontSize: 12,
-                fontWeight: 600,
-                margin: 0,
-              }}
-            >
-              {salaryInfo.month}
-            </p>
-            <button
-              onClick={onClose}
-              style={{
-                position: "absolute",
-                top: 16,
-                right: 16,
-                width: 30,
-                height: 30,
-                borderRadius: "50%",
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-              }}
-            >
-              <X
-                style={{
-                  width: 14,
-                  height: 14,
-                  color: "rgba(255,255,255,0.5)",
-                }}
-              />
-            </button>
-          </div>
-
-          {/* Scrollable body */}
-          <div
-            style={{
-              padding: "16px 20px 20px",
-              overflowY: "auto",
-              display: "flex",
-              flexDirection: "column",
-              gap: 16,
-            }}
-          >
-            {/* Income rows */}
-            <div>
-              <p style={{ ...LABEL_SM, marginBottom: 10 }}>Daromadlar</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {rows.map((row) => (
-                  <div
-                    key={row.label}
-                    style={{
-                      background: "rgba(34,197,94,0.05)",
-                      border: "1px solid rgba(34,197,94,0.1)",
-                      borderRadius: 14,
-                      padding: "12px 14px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: 8,
-                    }}
-                  >
-                    <div style={{ flex: 1 }}>
-                      <p
-                        style={{
-                          color: "rgba(255,255,255,0.8)",
-                          fontWeight: 700,
-                          fontSize: 13,
-                          margin: 0,
-                        }}
-                      >
-                        {row.label}
-                      </p>
-                      <p
-                        style={{
-                          color: "rgba(255,255,255,0.3)",
-                          fontSize: 10,
-                          margin: "3px 0 0",
-                        }}
-                      >
-                        {row.note}
-                      </p>
-                    </div>
-                    <span
-                      style={{
-                        color: "#4ade80",
-                        fontWeight: 800,
-                        fontSize: 13,
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      +{formatCurrency(row.amount)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Fines */}
-            <div>
-              <p
-                style={{
-                  ...LABEL_SM,
-                  color: "rgba(248,113,113,0.6)",
-                  marginBottom: 10,
-                }}
-              >
-                Jarimalar
-              </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {salaryInfo.fines.map((fine) => (
-                  <div
-                    key={fine.id}
-                    style={{
-                      background: "rgba(239,68,68,0.05)",
-                      border: "1px solid rgba(239,68,68,0.15)",
-                      borderRadius: 14,
-                      padding: "12px 14px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: 8,
-                    }}
-                  >
-                    <div style={{ flex: 1 }}>
-                      <p
-                        style={{
-                          color: "#f87171",
-                          fontWeight: 700,
-                          fontSize: 13,
-                          margin: 0,
-                        }}
-                      >
-                        {fine.reason}
-                      </p>
-                      <p
-                        style={{
-                          color: "rgba(248,113,113,0.4)",
-                          fontSize: 10,
-                          margin: "3px 0 0",
-                        }}
-                      >
-                        {fine.date}
-                      </p>
-                    </div>
-                    <span
-                      style={{
-                        color: "#f87171",
-                        fontWeight: 800,
-                        fontSize: 13,
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      -{formatCurrency(fine.amount)}
-                    </span>
-                  </div>
-                ))}
-                {salaryInfo.fines.length === 0 && (
-                  <div
-                    style={{
-                      background: "rgba(34,197,94,0.06)",
-                      border: "1px solid rgba(34,197,94,0.15)",
-                      borderRadius: 14,
-                      padding: "14px",
-                      textAlign: "center",
-                    }}
-                  >
-                    <p
-                      style={{
-                        color: "#4ade80",
-                        fontWeight: 700,
-                        fontSize: 13,
-                        margin: 0,
-                      }}
-                    >
-                      Tabriklaymiz, jarimalar yo'q! 🎉
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Total summary */}
-            <div
-              style={{
-                background: "rgba(34,197,94,0.06)",
-                border: "1px solid rgba(34,197,94,0.15)",
-                borderRadius: 18,
-                padding: "16px",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: 8,
-                }}
-              >
-                <span style={TEXT_SECONDARY}>Jami daromad</span>
-                <span
-                  style={{ color: "#4ade80", fontWeight: 800, fontSize: 13 }}
-                >
-                  +
-                  {formatCurrency(
-                    salaryInfo.baseSalary +
-                      salaryInfo.kpiBonus +
-                      salaryInfo.salesBonus +
-                      salaryInfo.collectionBonus,
-                  )}
-                </span>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: 12,
-                }}
-              >
-                <span style={TEXT_SECONDARY}>Jami jarimalar</span>
-                <span
-                  style={{ color: "#f87171", fontWeight: 800, fontSize: 13 }}
-                >
-                  -{formatCurrency(totalFines)}
-                </span>
-              </div>
-              <div
-                style={{
-                  height: 1,
-                  background: "rgba(34,197,94,0.15)",
-                  marginBottom: 12,
-                }}
-              />
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <span
-                  style={{
-                    color: "rgba(255,255,255,0.85)",
-                    fontWeight: 700,
-                    fontSize: 14,
-                  }}
-                >
-                  Sof maosh
-                </span>
-                <span
-                  style={{ color: "#60a5fa", fontWeight: 900, fontSize: 20 }}
-                >
-                  {formatCurrency(netSalary)}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
   );
 }

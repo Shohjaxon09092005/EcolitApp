@@ -1,26 +1,33 @@
-import { LayoutDashboard, PlusCircle, ShoppingBag, Tag, Users } from "lucide-react"
-import { useStore } from "@/lib/store"
-import { DashboardScreen } from "@/screens/DashboardScreen"
-import { NewOrderScreen } from "@/screens/NewOrderScreen"
-import { OrdersScreen } from "@/screens/OrdersScreen"
-import { PriceRequestsScreen } from "@/screens/PriceRequestsScreen"
-import { CustomersScreen } from "@/screens/CustomersScreen"
-import { Toaster } from "@/components/ui/sonner"
-
+import {
+  LayoutDashboard,
+  PlusCircle,
+  ShoppingBag,
+  Users,
+  Wallet,
+} from "lucide-react";
+import { useStore } from "@/lib/store";
+import { DashboardScreen } from "@/screens/DashboardScreen";
+import { NewOrderScreen } from "@/screens/NewOrderScreen";
+import { OrdersScreen } from "@/screens/OrdersScreen";
+// import { PriceRequestsScreen } from "@/screens/PriceRequestsScreen";
+import { CustomersScreen } from "@/screens/CustomersScreen";
+import { Toaster } from "@/components/ui/sonner";
+import { SalaryScreen } from "@/screens/SalaryScreen";
 const TABS = [
   { key: "dashboard", icon: LayoutDashboard },
   { key: "orders", icon: ShoppingBag },
   { key: "new-order", icon: PlusCircle },
   { key: "customers", icon: Users },
-  { key: "prices", icon: Tag },
-]
+  // { key: "prices", icon: Tag },
+  { key: "salary", icon: Wallet },
+];
 
 export default function App() {
-  const { activeTab, setActiveTab, cart, priceRequests } = useStore()
+  const { activeTab, setActiveTab, cart, priceRequests } = useStore();
 
   const pendingPriceRequests = priceRequests.filter(
-    (r) => r.status === "kutilmoqda"
-  ).length
+    (r) => r.status === "kutilmoqda",
+  ).length;
 
   return (
     <div
@@ -30,7 +37,7 @@ export default function App() {
         margin: "0 auto",
         position: "relative",
         // === YANGILANGAN PREMIUM TO'Q FON (Tepa va pasti qora-yashil) ===
-        background: "linear-gradient(180deg, #000c02 0%, #142815 50%, #000c02 100%)",
+        background: "linear-gradient(145deg, #f8fafc 0%, #eef2ff 100%)",
         overflow: "hidden",
       }}
     >
@@ -77,7 +84,8 @@ export default function App() {
             width: 380,
             height: 380,
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(34,197,94,0.18) 0%, rgba(0,153,34,0.03) 60%, transparent 80%)",
+            background:
+              "radial-gradient(circle, rgba(34,197,94,0.18) 0%, rgba(0,153,34,0.03) 60%, transparent 80%)",
             filter: "blur(30px)",
           }}
         />
@@ -91,7 +99,8 @@ export default function App() {
             width: 300,
             height: 300,
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(34,197,94,0.08) 0%, transparent 70%)",
+            background:
+              "radial-gradient(circle, rgba(34,197,94,0.08) 0%, transparent 70%)",
             filter: "blur(40px)",
           }}
         />
@@ -104,7 +113,8 @@ export default function App() {
             width: 250,
             height: 250,
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(52,211,153,0.06) 0%, transparent 65%)",
+            background:
+              "radial-gradient(circle, rgba(52,211,153,0.06) 0%, transparent 65%)",
             filter: "blur(35px)",
           }}
         />
@@ -119,7 +129,8 @@ export default function App() {
         {activeTab === "new-order" && <NewOrderScreen />}
         {activeTab === "orders" && <OrdersScreen />}
         {activeTab === "customers" && <CustomersScreen />}
-        {activeTab === "prices" && <PriceRequestsScreen />}
+        {/* {activeTab === "prices" && <PriceRequestsScreen />} */}
+        {activeTab === "salary" && <SalaryScreen />}
       </div>
 
       {/* Floating Glassmorphism Bottom Nav */}
@@ -133,7 +144,8 @@ export default function App() {
             position: "absolute",
             inset: -2,
             borderRadius: 9999,
-            background: "linear-gradient(90deg, transparent, rgba(34,197,94,0.12), transparent)",
+            background:
+              "linear-gradient(90deg, transparent, rgba(34,197,94,0.12), transparent)",
             filter: "blur(8px)",
             pointerEvents: "none",
           }}
@@ -153,15 +165,15 @@ export default function App() {
           }}
         >
           {TABS.map((tab) => {
-            const Icon = tab.icon
-            const isCenter = tab.key === "new-order"
-            const isActive = activeTab === tab.key
+            const Icon = tab.icon;
+            const isCenter = tab.key === "new-order";
+            const isActive = activeTab === tab.key;
             const badgeCount =
               tab.key === "orders"
                 ? cart.length
                 : tab.key === "prices"
-                ? pendingPriceRequests
-                : 0
+                  ? pendingPriceRequests
+                  : 0;
 
             if (isCenter) {
               return (
@@ -182,28 +194,29 @@ export default function App() {
                     cursor: "pointer",
                     boxShadow:
                       "0 0 20px rgba(34,197,94,0.5), 0 0 40px rgba(34,197,94,0.2), 0 4px 16px rgba(0,0,0,0.4)",
-                    transition: "transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s ease",
+                    transition:
+                      "transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s ease",
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "scale(1.12)"
+                    e.currentTarget.style.transform = "scale(1.12)";
                     e.currentTarget.style.boxShadow =
-                      "0 0 28px rgba(34,197,94,0.65), 0 0 56px rgba(34,197,94,0.3), 0 6px 20px rgba(0,0,0,0.5)"
+                      "0 0 28px rgba(34,197,94,0.65), 0 0 56px rgba(34,197,94,0.3), 0 6px 20px rgba(0,0,0,0.5)";
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "scale(1)"
+                    e.currentTarget.style.transform = "scale(1)";
                     e.currentTarget.style.boxShadow =
-                      "0 0 20px rgba(34,197,94,0.5), 0 0 40px rgba(34,197,94,0.2), 0 4px 16px rgba(0,0,0,0.4)"
+                      "0 0 20px rgba(34,197,94,0.5), 0 0 40px rgba(34,197,94,0.2), 0 4px 16px rgba(0,0,0,0.4)";
                   }}
                   onMouseDown={(e) => {
-                    e.currentTarget.style.transform = "scale(0.94)"
+                    e.currentTarget.style.transform = "scale(0.94)";
                   }}
                   onMouseUp={(e) => {
-                    e.currentTarget.style.transform = "scale(1.08)"
+                    e.currentTarget.style.transform = "scale(1.08)";
                   }}
                 >
                   <Icon style={{ width: 24, height: 24 }} />
                 </button>
-              )
+              );
             }
 
             return (
@@ -220,35 +233,35 @@ export default function App() {
                   justifyContent: "center",
                   position: "relative",
                   cursor: "pointer",
-                  background: isActive
-                    ? "rgba(34,197,94,0.12)"
-                    : "transparent",
-                  color: isActive
-                    ? "#4ade80"
-                    : "rgba(255,255,255,0.35)",
-                  boxShadow: isActive ? "0 0 12px rgba(34,197,94,0.15)" : "none",
+                  background: isActive ? "rgba(34,197,94,0.12)" : "transparent",
+                  color: isActive ? "#4ade80" : "rgba(255,255,255,0.35)",
+                  boxShadow: isActive
+                    ? "0 0 12px rgba(34,197,94,0.15)"
+                    : "none",
                   transition:
                     "transform 0.2s cubic-bezier(0.34,1.56,0.64,1), background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease",
                 }}
                 onMouseEnter={(e) => {
                   if (!isActive) {
-                    e.currentTarget.style.background = "rgba(34,197,94,0.08)"
-                    e.currentTarget.style.color = "rgba(255,255,255,0.7)"
+                    e.currentTarget.style.background = "rgba(34,197,94,0.08)";
+                    e.currentTarget.style.color = "rgba(255,255,255,0.7)";
                   }
-                  e.currentTarget.style.transform = "scale(1.18) translateY(-2px)"
+                  e.currentTarget.style.transform =
+                    "scale(1.18) translateY(-2px)";
                 }}
                 onMouseLeave={(e) => {
                   if (!isActive) {
-                    e.currentTarget.style.background = "transparent"
-                    e.currentTarget.style.color = "rgba(255,255,255,0.35)"
+                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.color = "rgba(255,255,255,0.35)";
                   }
-                  e.currentTarget.style.transform = "scale(1) translateY(0)"
+                  e.currentTarget.style.transform = "scale(1) translateY(0)";
                 }}
                 onMouseDown={(e) => {
-                  e.currentTarget.style.transform = "scale(0.9) translateY(0)"
+                  e.currentTarget.style.transform = "scale(0.9) translateY(0)";
                 }}
                 onMouseUp={(e) => {
-                  e.currentTarget.style.transform = "scale(1.1) translateY(-2px)"
+                  e.currentTarget.style.transform =
+                    "scale(1.1) translateY(-2px)";
                 }}
               >
                 <Icon style={{ width: 20, height: 20 }} />
@@ -291,12 +304,12 @@ export default function App() {
                   />
                 )}
               </button>
-            )
+            );
           })}
         </div>
       </div>
 
       <Toaster position="top-center" richColors />
     </div>
-  )
+  );
 }

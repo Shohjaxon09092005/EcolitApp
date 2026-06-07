@@ -17,7 +17,6 @@ import {
   CalendarDays,
   Upload,
 } from "lucide-react";
-// import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -43,62 +42,77 @@ import {
 import { InvoiceSheet } from "./InvoiceSheet";
 
 // --------------------------------------------------------------
-// Dizayn tokenlari (dashboard bilan bir xil)
+// Light / Emerald / 3D design tokens (matching Dashboard)
 // --------------------------------------------------------------
 const CARD = {
-  background: "rgba(9, 25, 13, 0.7)",
-  backdropFilter: "blur(12px)",
-  WebkitBackdropFilter: "blur(12px)",
-  border: "1px solid rgba(34, 197, 94, 0.25)",
-  borderRadius: 24,
+  background: "rgba(255, 255, 255, 0.92)",
+  backdropFilter: "blur(20px)",
+  WebkitBackdropFilter: "blur(20px)",
+  border: "2px solid #10b981",
+  borderRadius: 28,
   boxShadow:
-    "0 4px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.03)",
+    "0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.02), inset 0 1px 0 rgba(255,255,255,0.9)",
+  transition: "transform 0.2s ease, box-shadow 0.2s ease",
 } as const;
+
+const CARD_3D_HOVER = {
+  transform: "translateY(-4px) scale(1.01)",
+  boxShadow: "0 20px 35px -10px rgba(16, 185, 129, 0.25), 0 0 0 2px #10b981",
+};
 
 const INPUT_STYLE = {
   width: "100%",
   padding: "10px 30px",
-  background: "rgba(255, 255, 255, 0.05)",
-  border: "1px solid rgba(34, 197, 94, 0.4)",
-  borderRadius: 28,
+  background: "#ffffff",
+  border: "2px solid #10b981",
+  borderRadius: 32,
   fontSize: 14,
-  color: "#ffffff",
+  color: "#0f172a",
   outline: "none",
   transition: "all 0.2s",
-
-};
+} as const;
 
 const BUTTON_PRIMARY = {
-  background: "#22c55e",
+  background: "#10b981",
   border: "none",
   borderRadius: 40,
   padding: "12px 20px",
   fontWeight: 700,
-  color: "#000000",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: 8,
-  cursor: "pointer",
-  transition: "all 0.2s",
-};
-
-const BUTTON_SECONDARY = {
-  background: "rgba(255, 255, 255, 0.05)",
-  border: "1px solid rgba(34, 197, 94, 0.4)",
-  borderRadius: 40,
-  padding: "12px 20px",
-  fontWeight: 600,
   color: "#ffffff",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   gap: 8,
   cursor: "pointer",
+  transition: "all 0.2s",
+} as const;
+
+const BUTTON_SECONDARY = {
+  background: "rgba(255, 255, 255, 0.6)",
+  backdropFilter: "blur(8px)",
+  border: "2px solid #10b981",
+  borderRadius: 40,
+  padding: "12px 20px",
+  fontWeight: 600,
+  color: "#0f172a",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 8,
+  cursor: "pointer",
+  transition: "all 0.2s",
+} as const;
+
+const LABEL_STYLE = {
+  fontSize: 11,
+  fontWeight: 700,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase" as const,
+  color: "#10b981",
 };
 
 // --------------------------------------------------------------
-// Asosiy komponent
+// Main Component
 // --------------------------------------------------------------
 export function NewOrderScreen() {
   const {
@@ -182,30 +196,24 @@ export function NewOrderScreen() {
   return (
     <div
       style={{
+        background: "linear-gradient(145deg, #f0fdf4 0%, #ecfdf5 100%)",
+        minHeight: "100vh",
         padding: "16px 12px 112px",
         maxWidth: 480,
         margin: "0 auto",
+        color: "#0f172a",
       }}
     >
       {/* Header */}
       <div style={{ marginBottom: 24, padding: "0 8px" }}>
-        <div
-          style={{
-            fontSize: 12,
-            fontWeight: 600,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            color: "#86efac",
-            marginBottom: 6,
-          }}
-        >
+        <div style={{ ...LABEL_STYLE, marginBottom: 6, fontSize: 12 }}>
           Yangi buyurtma
         </div>
         <h1
           style={{
             fontSize: 28,
             fontWeight: 800,
-            color: "#ffffff",
+            color: "#0f172a",
             letterSpacing: "-0.5px",
           }}
         >
@@ -214,31 +222,29 @@ export function NewOrderScreen() {
       </div>
 
       {/* Partner Selection Card */}
-      <div style={{ ...CARD, padding: "20px", marginBottom: 24 }}>
-        <div
-          style={{
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: "0.08em",
-            color: "#86efac",
-            marginBottom: 12,
-          }}
-        >
-          Mijoz
-        </div>
+      <div
+        style={{ ...CARD, padding: "20px", marginBottom: 24 }}
+        onMouseEnter={(e) => Object.assign(e.currentTarget.style, CARD_3D_HOVER)}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = "";
+          e.currentTarget.style.boxShadow = CARD.boxShadow;
+        }}
+      >
+        <div style={LABEL_STYLE}>Mijoz</div>
         {selectedPartner ? (
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
+              marginTop: 12,
             }}
           >
             <div>
-              <div style={{ fontWeight: 700, color: "#ffffff", fontSize: 16 }}>
+              <div style={{ fontWeight: 700, color: "#0f172a", fontSize: 16 }}>
                 {selectedPartner.name}
               </div>
-              <div style={{ fontSize: 12, color: "#86efacb3", marginTop: 4 }}>
+              <div style={{ fontSize: 12, color: "#475569", marginTop: 4 }}>
                 {selectedPartner.phone}
               </div>
             </div>
@@ -248,7 +254,7 @@ export function NewOrderScreen() {
                   style={{
                     fontSize: 10,
                     fontWeight: 600,
-                    color: "#86efacb3",
+                    color: "#475569",
                     textTransform: "uppercase",
                   }}
                 >
@@ -258,7 +264,7 @@ export function NewOrderScreen() {
                   style={{
                     fontSize: 14,
                     fontWeight: 700,
-                    color: debtRatio > 0.8 ? "#fb923c" : "#ffffff",
+                    color: debtRatio > 0.8 ? "#f97316" : "#0f172a",
                   }}
                 >
                   {formatCurrency(selectedPartner.debtAmount)}
@@ -270,8 +276,8 @@ export function NewOrderScreen() {
                   setPartnerSearch("");
                 }}
                 style={{
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(34,197,94,0.3)",
+                  background: "#f1f5f9",
+                  border: "2px solid #10b981",
                   borderRadius: "50%",
                   width: 32,
                   height: 32,
@@ -281,7 +287,7 @@ export function NewOrderScreen() {
                   cursor: "pointer",
                 }}
               >
-                <X size={16} color="#86efac" />
+                <X size={16} color="#0f172a" />
               </button>
             </div>
           </div>
@@ -292,7 +298,7 @@ export function NewOrderScreen() {
               ...BUTTON_SECONDARY,
               width: "100%",
               justifyContent: "space-between",
-              padding: "12px 16px",
+              marginTop: 12,
             }}
           >
             Mijoz tanlash
@@ -308,29 +314,25 @@ export function NewOrderScreen() {
               display: "flex",
               gap: 10,
               background: isOverLimit
-                ? "rgba(239,68,68,0.1)"
-                : "rgba(251,146,60,0.1)",
-              border: `1px solid ${isOverLimit ? "rgba(239,68,68,0.3)" : "rgba(251,146,60,0.3)"}`,
+                ? "rgba(239,68,68,0.08)"
+                : "rgba(249,115,22,0.08)",
+              border: `1px solid ${isOverLimit ? "#ef4444" : "#f97316"}`,
             }}
           >
-            <AlertTriangle
-              size={16}
-              color={isOverLimit ? "#f87171" : "#fb923c"}
-              style={{ marginTop: 2 }}
-            />
+            <AlertTriangle size={16} color={isOverLimit ? "#ef4444" : "#f97316"} />
             <div>
               <div
                 style={{
                   fontSize: 12,
                   fontWeight: 700,
-                  color: isOverLimit ? "#f87171" : "#fb923c",
+                  color: isOverLimit ? "#ef4444" : "#f97316",
                 }}
               >
                 {isOverLimit
                   ? "Qarz limiti oshib ketdi!"
                   : "Qarz limiti yaqinlashmoqda"}
               </div>
-              <div style={{ fontSize: 11, color: "#86efacb3", marginTop: 4 }}>
+              <div style={{ fontSize: 11, color: "#475569", marginTop: 4 }}>
                 Limit: {formatCurrency(selectedPartner.debtLimit)} | Joriy qarz:{" "}
                 {formatCurrency(selectedPartner.debtAmount)}
               </div>
@@ -341,27 +343,24 @@ export function NewOrderScreen() {
 
       {/* Product Search Card */}
       {selectedPartner && (
-        <div style={{ ...CARD, padding: "20px", marginBottom: 24 }}>
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: "0.08em",
-              color: "#86efac",
-              marginBottom: 12,
-            }}
-          >
-            Mahsulot qo'shish
-          </div>
-          <div style={{ position: "relative" }}>
+        <div
+          style={{ ...CARD, padding: "20px", marginBottom: 24 }}
+          onMouseEnter={(e) => Object.assign(e.currentTarget.style, CARD_3D_HOVER)}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "";
+            e.currentTarget.style.boxShadow = CARD.boxShadow;
+          }}
+        >
+          <div style={LABEL_STYLE}>Mahsulot qo'shish</div>
+          <div style={{ position: "relative", marginTop: 12 }}>
             <Search
               size={16}
               style={{
                 position: "absolute",
-                left: 8,
+                left: 14,
                 top: "50%",
                 transform: "translateY(-50%)",
-                color: "#86efacb3",
+                color: "#10b981",
               }}
             />
             <input
@@ -383,13 +382,7 @@ export function NewOrderScreen() {
               }}
             >
               {filteredProducts.length === 0 ? (
-                <div
-                  style={{
-                    textAlign: "center",
-                    padding: 12,
-                    color: "#86efac80",
-                  }}
-                >
+                <div style={{ textAlign: "center", padding: 12, color: "#475569" }}>
                   Mahsulot topilmadi
                 </div>
               ) : (
@@ -408,36 +401,30 @@ export function NewOrderScreen() {
                         justifyContent: "space-between",
                         padding: "10px 12px",
                         borderRadius: 20,
-                        background: "rgba(255,255,255,0.03)",
-                        border: "1px solid rgba(34,197,94,0.2)",
+                        background: "#f8fafc",
+                        border: "1px solid #10b98140",
                         textAlign: "left",
                         width: "100%",
                       }}
                     >
                       <div>
-                        <div style={{ fontWeight: 600, color: "#ffffff" }}>
+                        <div style={{ fontWeight: 600, color: "#0f172a" }}>
                           {product.name}
                         </div>
-                        <div style={{ fontSize: 11, color: "#86efacb3" }}>
+                        <div style={{ fontSize: 11, color: "#475569" }}>
                           {product.stock} ta | {product.unit}
                         </div>
                       </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 10,
-                        }}
-                      >
-                        <div style={{ fontWeight: 700, color: "#4ade80" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <div style={{ fontWeight: 700, color: "#10b981" }}>
                           {formatCurrency(product.price)}
                         </div>
                         {inCart ? (
                           <Badge
                             style={{
-                              background: "#4ade8010",
-                              color: "#4ade80",
-                              border: "1px solid #4ade8030",
+                              background: "#10b98110",
+                              color: "#10b981",
+                              border: "1px solid #10b981",
                               borderRadius: 20,
                             }}
                           >
@@ -446,7 +433,7 @@ export function NewOrderScreen() {
                         ) : (
                           <div
                             style={{
-                              background: "#22c55e",
+                              background: "#10b981",
                               borderRadius: "50%",
                               width: 28,
                               height: 28,
@@ -455,7 +442,7 @@ export function NewOrderScreen() {
                               justifyContent: "center",
                             }}
                           >
-                            <Plus size={14} color="#000" />
+                            <Plus size={14} color="#ffffff" />
                           </div>
                         )}
                       </div>
@@ -470,28 +457,26 @@ export function NewOrderScreen() {
 
       {/* Cart */}
       {cart.length > 0 && (
-        <div style={{ ...CARD, padding: "20px", marginBottom: 24 }}>
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: "0.08em",
-              color: "#86efac",
-              marginBottom: 16,
-            }}
-          >
-            Savat ({cart.length} mahsulot)
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <div
+          style={{ ...CARD, padding: "20px", marginBottom: 24 }}
+          onMouseEnter={(e) => Object.assign(e.currentTarget.style, CARD_3D_HOVER)}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "";
+            e.currentTarget.style.boxShadow = CARD.boxShadow;
+          }}
+        >
+          <div style={LABEL_STYLE}>Savat ({cart.length} mahsulot)</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 16 }}>
             {cart.map((item) => {
               const unitPrice = item.requestedPrice ?? item.product.price;
               return (
                 <div
                   key={item.product.id}
                   style={{
-                    background: "rgba(255,255,255,0.05)",
+                    background: "#f8fafc",
                     borderRadius: 20,
                     padding: "12px",
+                    border: "1px solid #10b98120",
                   }}
                 >
                   <div
@@ -502,7 +487,7 @@ export function NewOrderScreen() {
                     }}
                   >
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 600, color: "#ffffff" }}>
+                      <div style={{ fontWeight: 600, color: "#0f172a" }}>
                         {item.product.name}
                       </div>
                       {item.requestedPrice && (
@@ -517,7 +502,7 @@ export function NewOrderScreen() {
                           <span
                             style={{
                               fontSize: 11,
-                              color: "#86efac80",
+                              color: "#475569",
                               textDecoration: "line-through",
                             }}
                           >
@@ -525,9 +510,9 @@ export function NewOrderScreen() {
                           </span>
                           <Badge
                             style={{
-                              background: "#4ade8010",
-                              color: "#4ade80",
-                              border: "1px solid #4ade8030",
+                              background: "#10b98110",
+                              color: "#10b981",
+                              border: "1px solid #10b981",
                               fontSize: 9,
                               padding: "1px 8px",
                             }}
@@ -545,13 +530,12 @@ export function NewOrderScreen() {
                             productId: item.product.id,
                             productName: item.product.name,
                             originalPrice: item.product.price,
-                            currentCartPrice:
-                              item.requestedPrice ?? item.product.price,
+                            currentCartPrice: item.requestedPrice ?? item.product.price,
                           })
                         }
                         style={{
-                          background: "rgba(255,255,255,0.05)",
-                          border: "1px solid rgba(34,197,94,0.3)",
+                          background: "#e2e8f0",
+                          border: "1px solid #10b981",
                           borderRadius: "50%",
                           width: 28,
                           height: 28,
@@ -560,13 +544,13 @@ export function NewOrderScreen() {
                           justifyContent: "center",
                         }}
                       >
-                        <MessageSquare size={14} color="#86efac" />
+                        <MessageSquare size={14} color="#0f172a" />
                       </button>
                       <button
                         onClick={() => removeFromCart(item.product.id)}
                         style={{
-                          background: "rgba(239,68,68,0.1)",
-                          border: "1px solid rgba(239,68,68,0.3)",
+                          background: "#fee2e2",
+                          border: "1px solid #ef4444",
                           borderRadius: "50%",
                           width: 28,
                           height: 28,
@@ -575,7 +559,7 @@ export function NewOrderScreen() {
                           justifyContent: "center",
                         }}
                       >
-                        <Trash2 size={14} color="#f87171" />
+                        <Trash2 size={14} color="#ef4444" />
                       </button>
                     </div>
                   </div>
@@ -586,16 +570,12 @@ export function NewOrderScreen() {
                       justifyContent: "space-between",
                     }}
                   >
-                    <div
-                      style={{ display: "flex", alignItems: "center", gap: 8 }}
-                    >
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <button
-                        onClick={() =>
-                          updateCartQuantity(item.product.id, item.quantity - 1)
-                        }
+                        onClick={() => updateCartQuantity(item.product.id, item.quantity - 1)}
                         style={{
-                          background: "rgba(255,255,255,0.05)",
-                          border: "1px solid rgba(34,197,94,0.3)",
+                          background: "#f1f5f9",
+                          border: "1px solid #10b981",
                           borderRadius: "50%",
                           width: 32,
                           height: 32,
@@ -604,25 +584,23 @@ export function NewOrderScreen() {
                           justifyContent: "center",
                         }}
                       >
-                        <Minus size={12} color="#ffffff" />
+                        <Minus size={12} color="#0f172a" />
                       </button>
                       <span
                         style={{
                           width: 32,
                           textAlign: "center",
                           fontWeight: 700,
-                          color: "#ffffff",
+                          color: "#0f172a",
                         }}
                       >
                         {item.quantity}
                       </span>
                       <button
-                        onClick={() =>
-                          updateCartQuantity(item.product.id, item.quantity + 1)
-                        }
+                        onClick={() => updateCartQuantity(item.product.id, item.quantity + 1)}
                         style={{
-                          background: "rgba(255,255,255,0.05)",
-                          border: "1px solid rgba(34,197,94,0.3)",
+                          background: "#f1f5f9",
+                          border: "1px solid #10b981",
                           borderRadius: "50%",
                           width: 32,
                           height: 32,
@@ -631,16 +609,10 @@ export function NewOrderScreen() {
                           justifyContent: "center",
                         }}
                       >
-                        <Plus size={12} color="#ffffff" />
+                        <Plus size={12} color="#0f172a" />
                       </button>
                     </div>
-                    <div
-                      style={{
-                        fontWeight: 800,
-                        color: "#4ade80",
-                        fontSize: 16,
-                      }}
-                    >
+                    <div style={{ fontWeight: 800, color: "#10b981", fontSize: 16 }}>
                       {formatCurrency(unitPrice * item.quantity)}
                     </div>
                   </div>
@@ -658,14 +630,14 @@ export function NewOrderScreen() {
             style={{
               marginBottom: 12,
               opacity: 0.5,
-              color: "#86efac",
+              color: "#10b981",
               margin: "0 auto",
             }}
           />
-          <div style={{ fontWeight: 600, fontSize: 16, color: "#ffffff" }}>
+          <div style={{ fontWeight: 600, fontSize: 16, color: "#0f172a" }}>
             Buyurtma yaratish
           </div>
-          <div style={{ fontSize: 13, color: "#86efacb3", marginTop: 6 }}>
+          <div style={{ fontSize: 13, color: "#475569", marginTop: 6 }}>
             Boshlash uchun mijoz tanlang
           </div>
         </div>
@@ -686,11 +658,12 @@ export function NewOrderScreen() {
         >
           <div
             style={{
-              background: "rgba(9, 25, 13, 0.9)",
+              background: "#ffffffd9",
               backdropFilter: "blur(20px)",
-              border: "1px solid rgba(34,197,94,0.3)",
+              border: "2px solid #10b981",
               borderRadius: 32,
               padding: "16px",
+              boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)",
             }}
           >
             <div
@@ -700,10 +673,8 @@ export function NewOrderScreen() {
                 marginBottom: 12,
               }}
             >
-              <span style={{ color: "#86efacb3", fontWeight: 600 }}>
-                Jami summa:
-              </span>
-              <span style={{ fontSize: 20, fontWeight: 800, color: "#4ade80" }}>
+              <span style={{ color: "#475569", fontWeight: 600 }}>Jami summa:</span>
+              <span style={{ fontSize: 20, fontWeight: 800, color: "#10b981" }}>
                 {formatCurrency(cartTotal)}
               </span>
             </div>
@@ -714,7 +685,7 @@ export function NewOrderScreen() {
                 width: "100%",
                 padding: "14px",
                 fontSize: 16,
-                background: isOverLimit ? "rgba(239,68,68,0.8)" : "#22c55e",
+                background: isOverLimit ? "#ef4444" : "#10b981",
               }}
             >
               {isOverLimit
@@ -729,16 +700,16 @@ export function NewOrderScreen() {
       <Dialog open={partnerModalOpen} onOpenChange={setPartnerModalOpen}>
         <DialogContent
           style={{
-            background: "rgba(3,14,7,0.98)",
-            backdropFilter: "blur(32px)",
-            border: "1px solid rgba(34,197,94,0.3)",
+            background: "#ffffff",
+            border: "2px solid #10b981",
             borderRadius: 32,
             maxWidth: 400,
+            boxShadow: "0 20px 35px -10px rgba(0,0,0,0.15)",
           }}
           className="[&>button]:hidden"
         >
           <DialogHeader>
-            <DialogTitle style={{ color: "#ffffff", fontWeight: 700 }}>
+            <DialogTitle style={{ color: "#0f172a", fontWeight: 700 }}>
               Mijoz tanlash
             </DialogTitle>
           </DialogHeader>
@@ -751,7 +722,7 @@ export function NewOrderScreen() {
                   left: 8,
                   top: "50%",
                   transform: "translateY(-50%)",
-                  color: "#86efac",
+                  color: "#10b981",
                 }}
               />
               <input
@@ -761,10 +732,8 @@ export function NewOrderScreen() {
                 style={INPUT_STYLE}
               />
             </div>
-
-            {/* 🛠️ QUYIDAGI DIVGA TAILWIND KLASSLARI QO'SHILDI */}
             <div
-              className="[&::-webkit-scrollbar]:hidden [scrollbar-width:none] [-ms-overflow-style:none]"
+              className="[&::-webkit-scrollbar]:hidden [scrollbar-width:none]"
               style={{
                 maxHeight: 300,
                 overflowY: "auto",
@@ -788,17 +757,17 @@ export function NewOrderScreen() {
                       justifyContent: "space-between",
                       alignItems: "center",
                       padding: "12px",
-                      background: "rgba(255,255,255,0.03)",
-                      border: "1px solid rgba(34,197,94,0.2)",
+                      background: "#f8fafc",
+                      border: "1px solid #10b98140",
                       borderRadius: 20,
                       width: "100%",
                     }}
                   >
                     <div>
-                      <div style={{ fontWeight: 600, color: "#ffffff" }}>
+                      <div style={{ fontWeight: 600, color: "#0f172a" }}>
                         {p.name}
                       </div>
-                      <div style={{ fontSize: 11, color: "#86efacb3" }}>
+                      <div style={{ fontSize: 11, color: "#475569" }}>
                         {p.phone}
                       </div>
                     </div>
@@ -806,17 +775,12 @@ export function NewOrderScreen() {
                       <div
                         style={{
                           fontWeight: 700,
-                          color:
-                            ratio >= 1
-                              ? "#f87171"
-                              : ratio > 0.7
-                                ? "#fb923c"
-                                : "#ffffff",
+                          color: ratio >= 1 ? "#ef4444" : ratio > 0.7 ? "#f97316" : "#0f172a",
                         }}
                       >
                         {formatCurrency(p.debtAmount)}
                       </div>
-                      <div style={{ fontSize: 10, color: "#86efac80" }}>
+                      <div style={{ fontSize: 10, color: "#475569" }}>
                         limit: {formatCurrency(p.debtLimit)}
                       </div>
                     </div>
@@ -835,11 +799,11 @@ export function NewOrderScreen() {
       >
         <DialogContent
           style={{
-            background: "rgba(3,14,7,0.98)",
-            backdropFilter: "blur(32px)",
-            border: "1px solid rgba(34,197,94,0.3)",
+            background: "#ffffff",
+            border: "2px solid #10b981",
             borderRadius: 32,
             maxWidth: 400,
+            boxShadow: "0 20px 35px -10px rgba(0,0,0,0.15)",
           }}
           className="[&>button]:hidden"
         >
@@ -849,33 +813,32 @@ export function NewOrderScreen() {
                 display: "flex",
                 alignItems: "center",
                 gap: 8,
-                color: "#ffffff",
+                color: "#0f172a",
               }}
             >
-              <MessageSquare size={18} color="#4ade80" />
+              <MessageSquare size={18} color="#10b981" />
               Narxni pasaytirish so'rovi
             </DialogTitle>
           </DialogHeader>
           <div style={{ marginTop: 16 }}>
             <div
               style={{
-                background: "rgba(255,255,255,0.05)",
+                background: "#f8fafc",
                 borderRadius: 20,
                 padding: "12px",
                 marginBottom: 16,
+                border: "1px solid #10b98140",
               }}
             >
-              <div style={{ fontWeight: 600, color: "#ffffff" }}>
+              <div style={{ fontWeight: 600, color: "#0f172a" }}>
                 {priceRequestModal.productName}
               </div>
-              <div style={{ fontSize: 12, color: "#86efacb3" }}>
+              <div style={{ fontSize: 12, color: "#475569" }}>
                 Joriy narx: {formatCurrency(priceRequestModal.originalPrice)}
               </div>
             </div>
             <div style={{ marginBottom: 12 }}>
-              <Label
-                style={{ color: "#86efac", fontSize: 12, fontWeight: 600 }}
-              >
+              <Label style={{ color: "#10b981", fontSize: 12, fontWeight: 600 }}>
                 So'ralayotgan narx (so'm)
               </Label>
               <input
@@ -887,9 +850,7 @@ export function NewOrderScreen() {
               />
             </div>
             <div style={{ marginBottom: 20 }}>
-              <Label
-                style={{ color: "#86efac", fontSize: 12, fontWeight: 600 }}
-              >
+              <Label style={{ color: "#10b981", fontSize: 12, fontWeight: 600 }}>
                 Sabab / Izoh
               </Label>
               <Textarea
@@ -899,24 +860,19 @@ export function NewOrderScreen() {
                 style={{
                   ...INPUT_STYLE,
                   minHeight: 80,
-                  borderRadius: 20,
+                  borderRadius: 24,
                   marginTop: 4,
                 }}
               />
             </div>
             <div style={{ display: "flex", gap: 12 }}>
               <button
-                onClick={() =>
-                  setPriceRequestModal((s) => ({ ...s, open: false }))
-                }
+                onClick={() => setPriceRequestModal((s) => ({ ...s, open: false }))}
                 style={{ ...BUTTON_SECONDARY, flex: 1 }}
               >
                 Bekor qilish
               </button>
-              <button
-                onClick={handlePriceRequestSubmit}
-                style={{ ...BUTTON_PRIMARY, flex: 1 }}
-              >
+              <button onClick={handlePriceRequestSubmit} style={{ ...BUTTON_PRIMARY, flex: 1 }}>
                 So'rov yuborish
               </button>
             </div>
@@ -948,7 +904,7 @@ export function NewOrderScreen() {
 }
 
 // --------------------------------------------------------------
-// PaymentSheet (to‘liq dark/neon uslubda)
+// PaymentSheet (light/emerald theme)
 // --------------------------------------------------------------
 function PaymentSheet({
   open,
@@ -987,12 +943,7 @@ function PaymentSheet({
 
   function handleConfirm() {
     const paid = method === "qarz" ? Number(paidAmount) || 0 : total;
-    onConfirm(
-      method,
-      paid,
-      method === "qarz" ? dueDate : undefined,
-      note || undefined,
-    );
+    onConfirm(method, paid, method === "qarz" ? dueDate : undefined, note || undefined);
     onClose();
   }
 
@@ -1000,17 +951,16 @@ function PaymentSheet({
     <Drawer open={open} onClose={onClose}>
       <DrawerContent
         style={{
-          background: "rgba(3,14,7,0.98)",
-          backdropFilter: "blur(32px)",
-          borderTop: "1px solid rgba(34,197,94,0.3)",
+          background: "#ffffff",
+          borderTop: "2px solid #10b981",
           borderRadius: "32px 32px 0 0",
+          boxShadow: "0 -4px 20px rgba(0,0,0,0.08)",
         }}
-        className="[&>div]:bg-transparent"
       >
         <DrawerHeader
           style={{
             padding: "20px 20px 12px",
-            borderBottom: "1px solid rgba(34,197,94,0.2)",
+            borderBottom: "1px solid rgba(16,185,129,0.2)",
             position: "relative",
           }}
         >
@@ -1020,17 +970,16 @@ function PaymentSheet({
               alignItems: "center",
               gap: 8,
               fontSize: 20,
-              color: "#ffffff",
+              color: "#0f172a",
+              fontWeight: 800,
             }}
           >
-            <CheckCircle size={20} color="#4ade80" />
+            <CheckCircle size={20} color="#10b981" />
             To'lov usulini tanlang
           </DrawerTitle>
-          <p style={{ color: "#86efacb3", marginTop: 6, fontSize: 13 }}>
+          <p style={{ color: "#475569", marginTop: 6, fontSize: 13 }}>
             Mijoz: {partnerName} | Jami:{" "}
-            <strong style={{ color: "#4ade80" }}>
-              {formatCurrency(total)}
-            </strong>
+            <strong style={{ color: "#10b981" }}>{formatCurrency(total)}</strong>
           </p>
           <button
             onClick={onClose}
@@ -1038,8 +987,8 @@ function PaymentSheet({
               position: "absolute",
               top: 20,
               right: 20,
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(34,197,94,0.3)",
+              background: "#f1f5f9",
+              border: "2px solid #10b981",
               borderRadius: "50%",
               width: 32,
               height: 32,
@@ -1048,7 +997,7 @@ function PaymentSheet({
               justifyContent: "center",
             }}
           >
-            <X size={16} color="#86efac" />
+            <X size={16} color="#0f172a" />
           </button>
         </DrawerHeader>
 
@@ -1061,9 +1010,7 @@ function PaymentSheet({
             gap: 20,
           }}
         >
-          <div
-            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
-          >
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             {methods.map((m) => (
               <button
                 key={m.key}
@@ -1075,28 +1022,15 @@ function PaymentSheet({
                   gap: 8,
                   padding: "14px",
                   borderRadius: 24,
-                  background:
-                    method === m.key
-                      ? "rgba(74,222,128,0.15)"
-                      : "rgba(255,255,255,0.03)",
-                  border:
-                    method === m.key
-                      ? "1px solid #4ade80"
-                      : "1px solid rgba(34,197,94,0.3)",
+                  background: method === m.key ? "#10b98110" : "#f8fafc",
+                  border: method === m.key ? "2px solid #10b981" : "1px solid #10b98140",
                   transition: "all 0.2s",
                 }}
               >
-                <div
-                  style={{ color: method === m.key ? "#4ade80" : "#ffffff" }}
-                >
+                <div style={{ color: method === m.key ? "#10b981" : "#475569" }}>
                   {m.icon}
                 </div>
-                <span
-                  style={{
-                    fontWeight: 600,
-                    color: method === m.key ? "#4ade80" : "#ffffff",
-                  }}
-                >
+                <span style={{ fontWeight: 600, color: method === m.key ? "#10b981" : "#0f172a" }}>
                   {m.label}
                 </span>
               </button>
@@ -1111,13 +1045,9 @@ function PaymentSheet({
                 alignItems: "center",
                 gap: 12,
                 padding: "14px",
-                borderRadius: 28,
-                background: checkUploaded
-                  ? "rgba(74,222,128,0.1)"
-                  : "rgba(255,255,255,0.03)",
-                border: checkUploaded
-                  ? "1px solid #4ade80"
-                  : "1px solid rgba(34,197,94,0.3)",
+                borderRadius: 32,
+                background: checkUploaded ? "#10b98110" : "#f8fafc",
+                border: checkUploaded ? "2px solid #10b981" : "1px solid #10b98140",
               }}
             >
               <div
@@ -1125,29 +1055,26 @@ function PaymentSheet({
                   width: 20,
                   height: 20,
                   borderRadius: 6,
-                  border: "2px solid #4ade80",
-                  background: checkUploaded ? "#4ade80" : "transparent",
+                  border: "2px solid #10b981",
+                  background: checkUploaded ? "#10b981" : "transparent",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                {checkUploaded && <CheckCircle size={12} color="#000" />}
+                {checkUploaded && <CheckCircle size={12} color="#ffffff" />}
               </div>
-              <span style={{ color: "#ffffff", fontWeight: 500 }}>
+              <span style={{ color: "#0f172a", fontWeight: 500 }}>
                 {checkUploaded ? "Chek yuklandi ✓" : "To'lov chekini yuklash"}
               </span>
-              <Upload
-                size={16}
-                style={{ marginLeft: "auto", color: "#86efac" }}
-              />
+              <Upload size={16} style={{ marginLeft: "auto", color: "#10b981" }} />
             </button>
           )}
 
           {method === "qarz" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <div>
-                <Label style={{ color: "#86efac", fontSize: 12 }}>
+                <Label style={{ color: "#10b981", fontSize: 12, fontWeight: 600 }}>
                   Avans to'lov (so'm)
                 </Label>
                 <input
@@ -1158,7 +1085,7 @@ function PaymentSheet({
                 />
               </div>
               <div>
-                <Label style={{ color: "#86efac", fontSize: 12 }}>
+                <Label style={{ color: "#10b981", fontSize: 12, fontWeight: 600 }}>
                   To'lov muddati
                 </Label>
                 <input
@@ -1169,7 +1096,7 @@ function PaymentSheet({
                 />
               </div>
               <div>
-                <Label style={{ color: "#86efac", fontSize: 12 }}>
+                <Label style={{ color: "#10b981", fontSize: 12, fontWeight: 600 }}>
                   Izoh / Sabab
                 </Label>
                 <Textarea
@@ -1182,18 +1109,19 @@ function PaymentSheet({
             </div>
           )}
 
-          <Separator style={{ background: "rgba(34,197,94,0.2)" }} />
+          <Separator style={{ background: "rgba(16,185,129,0.2)" }} />
           <div
             style={{
-              background: "rgba(74,222,128,0.05)",
+              background: "#10b98110",
               borderRadius: 28,
               padding: "16px",
               display: "flex",
               justifyContent: "space-between",
+              border: "1px solid #10b981",
             }}
           >
-            <span style={{ color: "#86efacb3" }}>Jami to'lov:</span>
-            <span style={{ fontSize: 20, fontWeight: 800, color: "#4ade80" }}>
+            <span style={{ color: "#475569" }}>Jami to'lov:</span>
+            <span style={{ fontSize: 20, fontWeight: 800, color: "#10b981" }}>
               {formatCurrency(total)}
             </span>
           </div>
@@ -1201,10 +1129,7 @@ function PaymentSheet({
             <button onClick={onClose} style={{ ...BUTTON_SECONDARY, flex: 1 }}>
               Bekor qilish
             </button>
-            <button
-              onClick={handleConfirm}
-              style={{ ...BUTTON_PRIMARY, flex: 1 }}
-            >
+            <button onClick={handleConfirm} style={{ ...BUTTON_PRIMARY, flex: 1 }}>
               Tasdiqlash
             </button>
           </div>

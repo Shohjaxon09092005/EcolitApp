@@ -11,13 +11,10 @@ import {
   FileText,
   AlertTriangle,
   TrendingUp,
-//   ChevronRight,
   X,
   UserPlus,
   DollarSign,
 } from "lucide-react";
-// import { Card, CardContent } from "@/components/ui/card";
-// import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -36,68 +33,82 @@ import { Textarea } from "@/components/ui/textarea";
 import { useStore, formatCurrency, type Partner } from "@/lib/store";
 
 // --------------------------------------------------------------
-// Dizayn tokenlari (dashboard bilan bir xil)
+// Light / Emerald / 3D design tokens (matching Dashboard)
 // --------------------------------------------------------------
 const CARD = {
-  background: "rgba(9, 25, 13, 0.7)",
-  backdropFilter: "blur(12px)",
-  WebkitBackdropFilter: "blur(12px)",
-  border: "1px solid rgba(34, 197, 94, 0.25)",
-  borderRadius: 24,
-  boxShadow:
-    "0 4px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.03)",
+  background: "rgba(255, 255, 255, 0.92)",
+  backdropFilter: "blur(20px)",
+  WebkitBackdropFilter: "blur(20px)",
+  border: "2px solid #10b981",
+  borderRadius: 28,
+  boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.02), inset 0 1px 0 rgba(255,255,255,0.9)",
+  transition: "transform 0.2s ease, box-shadow 0.2s ease",
 } as const;
+
+const CARD_3D_HOVER = {
+  transform: "translateY(-4px) scale(1.01)",
+  boxShadow: "0 20px 35px -10px rgba(16, 185, 129, 0.25), 0 0 0 2px #10b981",
+};
 
 const INPUT_STYLE = {
   width: "100%",
-  padding: "10px 26px",
-  background: "rgba(255, 255, 255, 0.05)",
-  border: "1px solid rgba(34, 197, 94, 0.4)",
-  borderRadius: 28,
+  padding: "10px 25px",
+  background: "#ffffff",
+  border: "2px solid #10b981",
+  borderRadius: 32,
   fontSize: 14,
-  color: "#ffffff",
+  color: "#0f172a",
   outline: "none",
   transition: "all 0.2s",
-};
+} as const;
 
 const BUTTON_PRIMARY = {
-  background: "#22c55e",
+  background: "#10b981",
   border: "none",
   borderRadius: 40,
   padding: "10px 16px",
   fontWeight: 700,
-  color: "#000000",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: 8,
-  cursor: "pointer",
-};
-
-const BUTTON_SECONDARY = {
-  background: "rgba(255, 255, 255, 0.05)",
-  border: "1px solid rgba(34, 197, 94, 0.4)",
-  borderRadius: 40,
-  padding: "10px 16px",
-  fontWeight: 600,
   color: "#ffffff",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   gap: 8,
   cursor: "pointer",
+  transition: "all 0.2s",
+} as const;
+
+const BUTTON_SECONDARY = {
+  background: "rgba(255, 255, 255, 0.6)",
+  backdropFilter: "blur(8px)",
+  border: "2px solid #10b981",
+  borderRadius: 40,
+  padding: "10px 16px",
+  fontWeight: 600,
+  color: "#0f172a",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 8,
+  cursor: "pointer",
+  transition: "all 0.2s",
+} as const;
+
+const LABEL_STYLE = {
+  fontSize: 11,
+  fontWeight: 700,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase" as const,
+  color: "#10b981",
 };
 
 // --------------------------------------------------------------
-// Asosiy komponent
+// Main Component
 // --------------------------------------------------------------
 export function CustomersScreen() {
   const { partners, addPartner } = useStore();
   const [search, setSearch] = useState("");
   const [filterDebtors, setFilterDebtors] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState<Partner | null>(
-    null,
-  );
+  const [selectedCustomer, setSelectedCustomer] = useState<Partner | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const [newCustomer, setNewCustomer] = useState({
@@ -108,10 +119,7 @@ export function CustomersScreen() {
     address: "",
     note: "",
   });
-  const [formErrors, setFormErrors] = useState<{
-    name?: string;
-    phone?: string;
-  }>({});
+  const [formErrors, setFormErrors] = useState<{ name?: string; phone?: string }>({});
 
   const totalCustomers = partners.length;
   const debtors = partners.filter((p) => p.debtAmount > 0);
@@ -127,10 +135,8 @@ export function CustomersScreen() {
   });
 
   function formatCompactCurrency(amount: number): string {
-    if (amount >= 1_000_000_000)
-      return (amount / 1_000_000_000).toFixed(1) + " mlrd so'm";
-    if (amount >= 1_000_000)
-      return (amount / 1_000_000).toFixed(1) + " mln so'm";
+    if (amount >= 1_000_000_000) return (amount / 1_000_000_000).toFixed(1) + " mlrd so'm";
+    if (amount >= 1_000_000) return (amount / 1_000_000).toFixed(1) + " mln so'm";
     return formatCurrency(amount);
   }
 
@@ -145,10 +151,10 @@ export function CustomersScreen() {
     addPartner({
       name: newCustomer.name,
       phone: newCustomer.phone,
-      email: newCustomer.email,
-      company: newCustomer.company,
-      address: newCustomer.address,
-      note: newCustomer.note,
+      email: newCustomer.email || undefined,
+      company: newCustomer.company || undefined,
+      address: newCustomer.address || '',
+      note: newCustomer.note || undefined,
       debtAmount: 0,
       debtLimit: 0,
     });
@@ -167,30 +173,24 @@ export function CustomersScreen() {
   return (
     <div
       style={{
+        background: "transparent",
+        minHeight: "100vh",
         padding: "16px 12px 112px",
         maxWidth: 480,
         margin: "0 auto",
+        color: "#0f172a",
       }}
     >
       {/* Header */}
       <div style={{ marginBottom: 24, padding: "0 8px" }}>
-        <div
-          style={{
-            fontSize: 12,
-            fontWeight: 600,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            color: "#86efac",
-            marginBottom: 6,
-          }}
-        >
+        <div style={{ ...LABEL_STYLE, marginBottom: 6, fontSize: 12 }}>
           Mijozlar bazasi
         </div>
         <h1
           style={{
             fontSize: 28,
             fontWeight: 800,
-            color: "#ffffff",
+            color: "#0f172a",
             letterSpacing: "-0.5px",
           }}
         >
@@ -213,53 +213,59 @@ export function CustomersScreen() {
             label: "Jami mijozlar",
             value: totalCustomers,
             icon: Users,
-            color: "#60a5fa",
-            bg: "rgba(96,165,250,0.1)",
+            color: "#3b82f6",
+            bg: "rgba(59,130,246,0.1)",
           },
           {
             label: "Qarzdorlar",
             value: debtors.length,
             icon: AlertTriangle,
-            color: "#fb923c",
-            bg: "rgba(251,146,60,0.1)",
+            color: "#f97316",
+            bg: "rgba(249,115,22,0.1)",
           },
           {
             label: "Jami qarz",
             value: formatCompactCurrency(totalDebt),
             icon: DollarSign,
-            color: "#f87171",
-            bg: "rgba(248,113,113,0.1)",
+            color: "#ef4444",
+            bg: "rgba(239,68,68,0.1)",
           },
         ].map((stat) => (
           <div
             key={stat.label}
             style={{ ...CARD, padding: "14px 10px", textAlign: "center" }}
+            onMouseEnter={(e) => Object.assign(e.currentTarget.style, CARD_3D_HOVER)}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "";
+              e.currentTarget.style.boxShadow = CARD.boxShadow;
+            }}
           >
             <div
               style={{
-                width: 36,
-                height: 36,
-                borderRadius: 12,
+                width: 40,
+                height: 40,
+                borderRadius: 16,
                 background: stat.bg,
+                border: `1px solid ${stat.color}40`,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                margin: "0 auto 10px",
+                margin: "0 auto 12px",
               }}
             >
-              <stat.icon size={18} color={stat.color} />
+              <stat.icon size={20} color={stat.color} />
             </div>
             <div
               style={{
-                fontSize: 20,
+                fontSize: 22,
                 fontWeight: 800,
-                color: "#ffffff",
+                color: "#0f172a",
                 lineHeight: 1.1,
               }}
             >
               {stat.value}
             </div>
-            <div style={{ fontSize: 11, color: "#86efacb3", marginTop: 6 }}>
+            <div style={{ fontSize: 11, color: "#475569", marginTop: 6 }}>
               {stat.label}
             </div>
           </div>
@@ -267,9 +273,7 @@ export function CustomersScreen() {
       </div>
 
       {/* Search + Filter + Add */}
-      <div
-        style={{ display: "flex", gap: 12, marginBottom: 24, padding: "0 8px" }}
-      >
+      <div style={{ display: "flex", gap: 12, marginBottom: 24, padding: "0 8px" }}>
         <div style={{ position: "relative", flex: 1 }}>
           <Search
             size={16}
@@ -278,7 +282,7 @@ export function CustomersScreen() {
               left: 8,
               top: "50%",
               transform: "translateY(-50%)",
-              color: "#86efac80",
+              color: "#10b981",
             }}
           />
           <input
@@ -314,24 +318,14 @@ export function CustomersScreen() {
       </div>
 
       {/* Customers List */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 14,
-          padding: "0 8px",
-        }}
-      >
+      <div style={{ display: "flex", flexDirection: "column", gap: 14, padding: "0 8px" }}>
         {filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "48px 16px" }}>
-            <Users
-              size={48}
-              style={{ marginBottom: 12, opacity: 0.5, color: "#86efac" }}
-            />
-            <div style={{ fontWeight: 600, fontSize: 16, color: "#ffffff" }}>
+            <Users size={48} style={{ marginBottom: 12, opacity: 0.5, color: "#10b981" }} />
+            <div style={{ fontWeight: 600, fontSize: 16, color: "#0f172a" }}>
               Mijoz topilmadi
             </div>
-            <div style={{ fontSize: 13, color: "#86efacb3", marginTop: 6 }}>
+            <div style={{ fontSize: 13, color: "#475569", marginTop: 6 }}>
               Yangi mijoz qo‘shish uchun + tugmasini bosing
             </div>
           </div>
@@ -349,6 +343,11 @@ export function CustomersScreen() {
                 animation: `fadeInUp 0.3s ease ${idx * 0.05}s both`,
               }}
               className="active:scale-[0.98]"
+              onMouseEnter={(e) => Object.assign(e.currentTarget.style, CARD_3D_HOVER)}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "";
+                e.currentTarget.style.boxShadow = CARD.boxShadow;
+              }}
             >
               <style>
                 {`
@@ -376,11 +375,11 @@ export function CustomersScreen() {
                   >
                     <div
                       style={{
-                        width: 40,
-                        height: 40,
+                        width: 44,
+                        height: 44,
                         borderRadius: "50%",
-                        background: "rgba(74,222,128,0.15)",
-                        border: "1px solid rgba(74,222,128,0.3)",
+                        background: "#f1f5f9",
+                        border: "2px solid #10b981",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -390,7 +389,7 @@ export function CustomersScreen() {
                         style={{
                           fontSize: 18,
                           fontWeight: 700,
-                          color: "#4ade80",
+                          color: "#10b981",
                         }}
                       >
                         {customer.name.charAt(0).toUpperCase()}
@@ -401,7 +400,7 @@ export function CustomersScreen() {
                         style={{
                           fontWeight: 700,
                           fontSize: 16,
-                          color: "#ffffff",
+                          color: "#0f172a",
                         }}
                       >
                         {customer.name}
@@ -409,7 +408,7 @@ export function CustomersScreen() {
                       <div
                         style={{
                           fontSize: 12,
-                          color: "#86efacb3",
+                          color: "#475569",
                           marginTop: 2,
                         }}
                       >
@@ -424,7 +423,7 @@ export function CustomersScreen() {
                         alignItems: "center",
                         gap: 6,
                         fontSize: 12,
-                        color: "#86efacb3",
+                        color: "#475569",
                         marginBottom: 4,
                       }}
                     >
@@ -437,13 +436,13 @@ export function CustomersScreen() {
                   {customer.debtAmount > 0 ? (
                     <Badge
                       style={{
-                        background: "rgba(248,113,113,0.15)",
-                        color: "#f87171",
-                        border: "1px solid rgba(248,113,113,0.4)",
-                        borderRadius: 20,
+                        background: "#fee2e2",
+                        color: "#ef4444",
+                        border: "1px solid #ef4444",
+                        borderRadius: 30,
                         fontSize: 10,
                         fontWeight: 700,
-                        padding: "2px 10px",
+                        padding: "4px 12px",
                       }}
                     >
                       Qarz: {formatCurrency(customer.debtAmount)}
@@ -451,19 +450,18 @@ export function CustomersScreen() {
                   ) : (
                     <Badge
                       style={{
-                        background: "rgba(74,222,128,0.15)",
-                        color: "#4ade80",
-                        border: "1px solid rgba(74,222,128,0.4)",
-                        borderRadius: 20,
+                        background: "#d1fae5",
+                        color: "#10b981",
+                        border: "1px solid #10b981",
+                        borderRadius: 30,
                         fontSize: 10,
                         fontWeight: 700,
-                        padding: "2px 10px",
+                        padding: "4px 12px",
                       }}
                     >
                       To'lovchi
                     </Badge>
                   )}
-                  
                 </div>
               </div>
             </button>
@@ -475,11 +473,11 @@ export function CustomersScreen() {
       <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
         <DialogContent
           style={{
-            background: "rgba(3,14,7,0.98)",
-            backdropFilter: "blur(32px)",
-            border: "1px solid rgba(34,197,94,0.3)",
+            background: "#ffffff",
+            border: "2px solid #10b981",
             borderRadius: 32,
             maxWidth: 400,
+            boxShadow: "0 20px 35px -10px rgba(0,0,0,0.15)",
           }}
           className="[&>button]:hidden"
         >
@@ -489,135 +487,105 @@ export function CustomersScreen() {
                 display: "flex",
                 alignItems: "center",
                 gap: 8,
-                color: "#ffffff",
+                color: "#0f172a",
                 fontWeight: 700,
               }}
             >
-              <UserPlus size={20} color="#4ade80" />
+              <UserPlus size={20} color="#10b981" />
               Yangi mijoz qo'shish
             </DialogTitle>
           </DialogHeader>
-          <div className="[&::-webkit-scrollbar]:hidden [scrollbar-width:none] [-ms-overflow-style:none]"
-          style={{ marginTop: 16, maxHeight: "70vh", overflowY: "auto", }}>
+          <div
+            style={{
+              marginTop: 16,
+              maxHeight: "70vh",
+              overflowY: "auto",
+            }}
+            className="[&::-webkit-scrollbar]:hidden [scrollbar-width:none]"
+          >
             <div style={{ marginBottom: 16 }}>
-              <Label
-                style={{ color: "#86efac", fontSize: 12, fontWeight: 600 }}
-              >
-                Ism <span style={{ color: "#f87171" }}>*</span>
+              <Label style={{ color: "#10b981", fontSize: 12, fontWeight: 600 }}>
+                Ism <span style={{ color: "#ef4444" }}>*</span>
               </Label>
               <input
                 type="text"
                 placeholder="To'liq ism yoki kompaniya"
                 value={newCustomer.name}
-                onChange={(e) =>
-                  setNewCustomer({ ...newCustomer, name: e.target.value })
-                }
+                onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
                 style={{
                   ...INPUT_STYLE,
                   marginTop: 6,
-                  borderColor: formErrors.name
-                    ? "#f87171"
-                    : "rgba(34,197,94,0.4)",
+                  borderColor: formErrors.name ? "#ef4444" : "#10b981",
                 }}
               />
               {formErrors.name && (
-                <div style={{ fontSize: 11, color: "#f87171", marginTop: 4 }}>
+                <div style={{ fontSize: 11, color: "#ef4444", marginTop: 4 }}>
                   {formErrors.name}
                 </div>
               )}
             </div>
             <div style={{ marginBottom: 16 }}>
-              <Label
-                style={{ color: "#86efac", fontSize: 12, fontWeight: 600 }}
-              >
-                Telefon <span style={{ color: "#f87171" }}>*</span>
+              <Label style={{ color: "#10b981", fontSize: 12, fontWeight: 600 }}>
+                Telefon <span style={{ color: "#ef4444" }}>*</span>
               </Label>
               <input
                 type="tel"
                 placeholder="+998 90 123 45 67"
                 value={newCustomer.phone}
-                onChange={(e) =>
-                  setNewCustomer({ ...newCustomer, phone: e.target.value })
-                }
+                onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
                 style={{
                   ...INPUT_STYLE,
                   marginTop: 6,
-                  borderColor: formErrors.phone
-                    ? "#f87171"
-                    : "rgba(34,197,94,0.4)",
+                  borderColor: formErrors.phone ? "#ef4444" : "#10b981",
                 }}
               />
               {formErrors.phone && (
-                <div style={{ fontSize: 11, color: "#f87171", marginTop: 4 }}>
+                <div style={{ fontSize: 11, color: "#ef4444", marginTop: 4 }}>
                   {formErrors.phone}
                 </div>
               )}
             </div>
             <div style={{ marginBottom: 16 }}>
-              <Label
-                style={{ color: "#86efac", fontSize: 12, fontWeight: 600 }}
-              >
-                Email
-              </Label>
+              <Label style={{ color: "#10b981", fontSize: 12, fontWeight: 600 }}>Email</Label>
               <input
                 type="email"
                 placeholder="email@example.com"
                 value={newCustomer.email}
-                onChange={(e) =>
-                  setNewCustomer({ ...newCustomer, email: e.target.value })
-                }
+                onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
                 style={{ ...INPUT_STYLE, marginTop: 6 }}
               />
             </div>
             <div style={{ marginBottom: 16 }}>
-              <Label
-                style={{ color: "#86efac", fontSize: 12, fontWeight: 600 }}
-              >
-                Kompaniya
-              </Label>
+              <Label style={{ color: "#10b981", fontSize: 12, fontWeight: 600 }}>Kompaniya</Label>
               <input
                 type="text"
                 placeholder="Kompaniya nomi"
                 value={newCustomer.company}
-                onChange={(e) =>
-                  setNewCustomer({ ...newCustomer, company: e.target.value })
-                }
+                onChange={(e) => setNewCustomer({ ...newCustomer, company: e.target.value })}
                 style={{ ...INPUT_STYLE, marginTop: 6 }}
               />
             </div>
             <div style={{ marginBottom: 16 }}>
-              <Label
-                style={{ color: "#86efac", fontSize: 12, fontWeight: 600 }}
-              >
-                Manzil
-              </Label>
+              <Label style={{ color: "#10b981", fontSize: 12, fontWeight: 600 }}>Manzil</Label>
               <input
                 type="text"
                 placeholder="Shahar, ko'cha, uy"
                 value={newCustomer.address}
-                onChange={(e) =>
-                  setNewCustomer({ ...newCustomer, address: e.target.value })
-                }
+                onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
                 style={{ ...INPUT_STYLE, marginTop: 6 }}
               />
             </div>
             <div style={{ marginBottom: 20 }}>
-              <Label
-                style={{ color: "#86efac", fontSize: 12, fontWeight: 600 }}
-              >
-                Izoh
-              </Label>
+              <Label style={{ color: "#10b981", fontSize: 12, fontWeight: 600 }}>Izoh</Label>
               <Textarea
                 placeholder="Qo'shimcha ma'lumot..."
                 value={newCustomer.note}
-                onChange={(e) =>
-                  setNewCustomer({ ...newCustomer, note: e.target.value })
-                }
+                onChange={(e) => setNewCustomer({ ...newCustomer, note: e.target.value })}
                 style={{
                   ...INPUT_STYLE,
                   marginTop: 6,
                   minHeight: 80,
-                  borderRadius: 20,
+                  borderRadius: 24,
                 }}
               />
             </div>
@@ -628,10 +596,7 @@ export function CustomersScreen() {
               >
                 Bekor qilish
               </button>
-              <button
-                onClick={handleCreateCustomer}
-                style={{ ...BUTTON_PRIMARY, flex: 1 }}
-              >
+              <button onClick={handleCreateCustomer} style={{ ...BUTTON_PRIMARY, flex: 1 }}>
                 Saqlash
               </button>
             </div>
@@ -641,47 +606,35 @@ export function CustomersScreen() {
 
       {/* Customer Detail Drawer */}
       {selectedCustomer && (
-        <CustomerDetailDrawer
-          customer={selectedCustomer}
-          onClose={() => setSelectedCustomer(null)}
-        />
+        <CustomerDetailDrawer customer={selectedCustomer} onClose={() => setSelectedCustomer(null)} />
       )}
     </div>
   );
 }
 
 // --------------------------------------------------------------
-// Customer Detail Drawer (to‘liq qayta stilizatsiya)
+// Customer Detail Drawer (Light / Emerald)
 // --------------------------------------------------------------
-function CustomerDetailDrawer({
-  customer,
-  onClose,
-}: {
-  customer: Partner;
-  onClose: () => void;
-}) {
+function CustomerDetailDrawer({ customer, onClose }: { customer: Partner; onClose: () => void }) {
   const { orders } = useStore();
   const customerOrders = orders.filter((o) => o.partnerId === customer.id);
   const totalSpent = customerOrders.reduce((sum, o) => sum + o.totalAmount, 0);
-  const lastOrder = customerOrders.sort((a, b) =>
-    b.createdAt.localeCompare(a.createdAt),
-  )[0];
+  const lastOrder = customerOrders.sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
 
   return (
     <Drawer open onClose={onClose}>
       <DrawerContent
         style={{
-          background: "rgba(3,14,7,0.98)",
-          backdropFilter: "blur(32px)",
-          borderTop: "1px solid rgba(34,197,94,0.3)",
+          background: "#ffffff",
+          borderTop: "2px solid #10b981",
           borderRadius: "32px 32px 0 0",
+          boxShadow: "0 -4px 20px rgba(0,0,0,0.08)",
         }}
-        className="[&>div]:bg-transparent"
       >
         <DrawerHeader
           style={{
             padding: "20px 20px 12px",
-            borderBottom: "1px solid rgba(34,197,94,0.2)",
+            borderBottom: "1px solid rgba(16,185,129,0.2)",
             position: "relative",
           }}
         >
@@ -693,23 +646,16 @@ function CustomerDetailDrawer({
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div
-                style={{
-                  width: 4,
-                  height: 24,
-                  borderRadius: 2,
-                  background: "#4ade80",
-                }}
-              />
-              <span style={{ fontSize: 18, fontWeight: 800, color: "#ffffff" }}>
+              <div style={{ width: 5, height: 28, borderRadius: 4, background: "#10b981" }} />
+              <span style={{ fontSize: 18, fontWeight: 800, color: "#0f172a" }}>
                 {customer.name}
               </span>
             </div>
             <button
               onClick={onClose}
               style={{
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(34,197,94,0.3)",
+                background: "#f1f5f9",
+                border: "2px solid #10b981",
                 borderRadius: "50%",
                 width: 32,
                 height: 32,
@@ -718,7 +664,7 @@ function CustomerDetailDrawer({
                 justifyContent: "center",
               }}
             >
-              <X size={16} color="#86efac" />
+              <X size={16} color="#0f172a" />
             </button>
           </DrawerTitle>
         </DrawerHeader>
@@ -733,57 +679,32 @@ function CustomerDetailDrawer({
           }}
         >
           {/* Contact Info */}
-          <div style={{ ...CARD, padding: "16px" }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                marginBottom: 12,
-              }}
-            >
-              <Phone size={14} color="#86efac" />
-              <span style={{ color: "#ffffff" }}>{customer.phone}</span>
+          <div
+            style={{
+              ...CARD,
+              padding: "16px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+              <Phone size={14} color="#10b981" />
+              <span style={{ color: "#0f172a" }}>{customer.phone}</span>
             </div>
             {customer.email && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  marginBottom: 12,
-                }}
-              >
-                <Mail size={14} color="#86efac" />
-                <span style={{ color: "#ffffff" }}>{customer.email}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                <Mail size={14} color="#10b981" />
+                <span style={{ color: "#0f172a" }}>{customer.email}</span>
               </div>
             )}
             {customer.company && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  marginBottom: 12,
-                }}
-              >
-                <Building2 size={14} color="#86efac" />
-                <span style={{ color: "#ffffff" }}>{customer.company}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                <Building2 size={14} color="#10b981" />
+                <span style={{ color: "#0f172a" }}>{customer.company}</span>
               </div>
             )}
             {customer.address && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  marginBottom: 12,
-                }}
-              >
-                <MapPin size={14} color="#86efac" />
-                <span style={{ color: "#ffffff", flex: 1 }}>
-                  {customer.address}
-                </span>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                <MapPin size={14} color="#10b981" />
+                <span style={{ color: "#0f172a", flex: 1 }}>{customer.address}</span>
               </div>
             )}
             {customer.note && (
@@ -794,48 +715,30 @@ function CustomerDetailDrawer({
                   gap: 8,
                   marginTop: 8,
                   paddingTop: 8,
-                  borderTop: "1px solid rgba(34,197,94,0.2)",
+                  borderTop: "1px solid rgba(16,185,129,0.2)",
                 }}
               >
-                <FileText size={14} color="#86efac" />
-                <span style={{ color: "#ffffffcc", flex: 1 }}>
-                  {customer.note}
-                </span>
+                <FileText size={14} color="#10b981" />
+                <span style={{ color: "#475569", flex: 1 }}>{customer.note}</span>
               </div>
             )}
           </div>
 
           {/* Financial Stats */}
-          <div
-            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
-          >
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <div style={{ ...CARD, padding: "12px", textAlign: "center" }}>
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: "#86efac",
-                  marginBottom: 6,
-                }}
-              >
+              <div style={{ fontSize: 11, fontWeight: 600, color: "#10b981", marginBottom: 6 }}>
                 Qarzi
               </div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: "#f87171" }}>
+              <div style={{ fontSize: 18, fontWeight: 800, color: "#ef4444" }}>
                 {formatCurrency(customer.debtAmount)}
               </div>
             </div>
             <div style={{ ...CARD, padding: "12px", textAlign: "center" }}>
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: "#86efac",
-                  marginBottom: 6,
-                }}
-              >
+              <div style={{ fontSize: 11, fontWeight: 600, color: "#10b981", marginBottom: 6 }}>
                 Umumiy xarid
               </div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: "#4ade80" }}>
+              <div style={{ fontSize: 18, fontWeight: 800, color: "#10b981" }}>
                 {formatCurrency(totalSpent)}
               </div>
             </div>
@@ -844,20 +747,10 @@ function CustomerDetailDrawer({
           {/* Recent Orders */}
           {customerOrders.length > 0 && (
             <div>
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 700,
-                  letterSpacing: 1,
-                  color: "#86efac",
-                  marginBottom: 12,
-                }}
-              >
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: "#10b981", marginBottom: 12 }}>
                 So'nggi buyurtmalar
               </div>
-              <div
-                style={{ display: "flex", flexDirection: "column", gap: 10 }}
-              >
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {customerOrders.slice(0, 3).map((order) => (
                   <div
                     key={order.id}
@@ -875,44 +768,28 @@ function CustomerDetailDrawer({
                           fontSize: 12,
                           fontWeight: 600,
                           fontFamily: "monospace",
-                          color: "#86efac",
+                          color: "#10b981",
                         }}
                       >
                         {order.id}
                       </div>
-                      <div style={{ fontSize: 10, color: "#86efacb3" }}>
-                        {order.createdAt}
-                      </div>
+                      <div style={{ fontSize: 10, color: "#475569" }}>{order.createdAt}</div>
                     </div>
                     <div style={{ textAlign: "right" }}>
-                      <div
-                        style={{
-                          fontSize: 14,
-                          fontWeight: 700,
-                          color: "#4ade80",
-                        }}
-                      >
+                      <div style={{ fontSize: 14, fontWeight: 700, color: "#0f172a" }}>
                         {formatCurrency(order.totalAmount)}
                       </div>
                       <Badge
                         style={{
-                          background:
-                            order.status === "yetkazildi"
-                              ? "rgba(74,222,128,0.15)"
-                              : "rgba(251,146,60,0.15)",
-                          color:
-                            order.status === "yetkazildi"
-                              ? "#4ade80"
-                              : "#fb923c",
+                          background: order.status === "yetkazildi" ? "#d1fae5" : "#fed7aa",
+                          color: order.status === "yetkazildi" ? "#10b981" : "#f97316",
                           border: "1px solid currentColor",
                           fontSize: 9,
                           padding: "2px 8px",
                           borderRadius: 20,
                         }}
                       >
-                        {order.status === "yetkazildi"
-                          ? "Yetkazildi"
-                          : "Jarayonda"}
+                        {order.status === "yetkazildi" ? "Yetkazildi" : "Jarayonda"}
                       </Badge>
                     </div>
                   </div>
@@ -932,16 +809,12 @@ function CustomerDetailDrawer({
               }}
             >
               <div>
-                <div style={{ fontSize: 11, color: "#86efacb3" }}>
-                  Oxirgi buyurtma
-                </div>
-                <div
-                  style={{ fontSize: 14, fontWeight: 700, color: "#ffffff" }}
-                >
+                <div style={{ fontSize: 11, color: "#475569" }}>Oxirgi buyurtma</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "#0f172a" }}>
                   {lastOrder.createdAt}
                 </div>
               </div>
-              <TrendingUp size={20} color="#4ade80" />
+              <TrendingUp size={20} color="#10b981" />
             </div>
           )}
         </div>
